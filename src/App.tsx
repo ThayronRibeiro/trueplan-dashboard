@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { useChamadoService } from "./app/services/chamados.service";
@@ -47,6 +47,8 @@ import { Categoria } from "./app/models/categoria";
 import { useCategoriaService } from "./app/services/categoria.service";
 import { FormSubmitHandler } from "react-hook-form";
 import { Chamado } from "./app/models/chamado";
+import { ChamadoTable } from "./components/patterns/ChamadoTable";
+import { DatasAbertura } from "./app/models/utils/DatasAberturas";
 
 export function App() {
   const [open, setOpen] = useState(false);
@@ -61,6 +63,12 @@ export function App() {
   const chamadoService = useChamadoService();
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
+
+  const [activeTab, setActiveTab] = useState(0);
+
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  let data;
 
   const {
     register,
@@ -90,13 +98,29 @@ export function App() {
     });
   }, []);
 
+  useEffect(() => {
+    const elemento = triggerRef.current;
+    if (elemento) {
+      elemento.addEventListener("click", handleTeste);
+    }
+
+    // Removendo o event listener quando o componente for desmontado
+    return () => {
+      if (elemento) {
+        elemento.removeEventListener("click", handleTeste);
+      }
+    };
+  }, []);
+
+  const handleTeste = () => {
+    console.log("Teste");
+  };
+
   const handleChangeTab = (data: string) => {
-    setInterval(() => {
-      chamadoService.listarChamadosPorData(data).then((value) => {
-        console.log("Dados retornados de listarChamadosPorData:", value);
-        setChamados(value ?? []);
-      });
-    }, 10000);
+    chamadoService.listarChamadosPorData(data).then((value) => {
+      console.log("Dados retornados de listarChamadosPorData:", value);
+      setChamados(value ?? []);
+    });
   };
 
   // const handleSubmit = (data: Chamado) => {
@@ -113,14 +137,14 @@ export function App() {
   return (
     <div className="p-4 space-y-4">
       <Dialog>
-        <DialogTrigger asChild>
-          <div id="container" className="flex items-center justify-end">
-            <Button className="flex items-center">
+        <div id="container" className="flex items-center justify-end">
+          <DialogTrigger asChild>
+            <Button className="flex items-center align-middle bg-emerald-500 hover:bg-emerald-600">
               <PlusCircle className="w-4 h-4 mr-2" />
               Novo Chamado
             </Button>
-          </div>
-        </DialogTrigger>
+          </DialogTrigger>
+        </div>
 
         <DialogContent className="min-w-[80%] min-h-[70%]">
           <DialogHeader>
@@ -138,8 +162,6 @@ export function App() {
                     open={open}
                     onOpenChange={setOpen}
                     {...register("usuario", { required: true })}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onChange={(e: any) => setCliente(e.target.value)}
                   >
                     <PopoverTrigger asChild>
                       <Button
@@ -221,7 +243,7 @@ export function App() {
                   />
                 </div>
                 <div className="flex-col space-y-2 col-span-1">
-                  <Label htmlFor="telefone1">Telefone 2*</Label>
+                  <Label htmlFor="telefone1">Telefone 2</Label>
                   <Input
                     id="telefone2"
                     placeholder="Digite o segundo telefone do contato"
@@ -241,7 +263,7 @@ export function App() {
                           ? categorias.find(
                               (categorias) => categorias.descricao === value2
                             )?.descricao
-                          : "Selecione a categoria.."}
+                          : "Selecione a categoria"}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -325,20 +347,26 @@ export function App() {
       </Dialog>
 
       <Tabs orientation="horizontal">
-        <TabsList loop={false}>
-          {datasAberturas.map((_datas) => (
-            <>
-              <TabsTrigger value={_datas} key={_datas}>
-                {_datas}
-              </TabsTrigger>
-            </>
-          ))}
+        <TabsList>
+          <>
+            {datasAberturas.map((_datas) => (
+              <>
+                <TabsTrigger
+                  value={_datas}
+                  key={_datas}
+                  onClick={handleChangeTab(_datas)}
+                >
+                  {_datas.replace("-", "/").replace("-", "/")}
+                </TabsTrigger>
+              </>
+            ))}
+          </>
         </TabsList>
 
         {datasAberturas.map((_datas) => (
           <>
             <TabsContent value={_datas} key={_datas}>
-              {_datas}
+              <ChamadoTable chamados={chamados} />
             </TabsContent>
           </>
         ))}
