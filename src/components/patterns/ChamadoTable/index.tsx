@@ -35,8 +35,7 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
             <TableRow>
               <TableCell
                 className={cn(
-                  "font-medium",
-                  `bg-[#${chamado.status.corBackground}]`
+                  `font-medium bg-[#${chamado.status.corBackground}] text-[#${chamado.status.corLetras}]`
                 )}
               >
                 {chamado.status.descricao}
