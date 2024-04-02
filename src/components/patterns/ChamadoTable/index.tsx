@@ -16,7 +16,7 @@ interface ChamadoTableProps {
 
 export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border ">
       <Table>
         <TableCaption>Todos os chamados desta data.</TableCaption>
         <TableHeader>
@@ -32,10 +32,11 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
         </TableHeader>
         <TableBody>
           {chamados.map((chamado) => (
-            <TableRow>
+            <TableRow key={chamado.id}>
               <TableCell
                 className={cn(
-                  `font-medium bg-[#${chamado.status.corBackground}] text-[#${chamado.status.corLetras}]`
+                  `font-medium`,
+                  `bg-[#${chamado.status.corBackground}] text-[#${chamado.status.corLetras}]`
                 )}
               >
                 {chamado.status.descricao}

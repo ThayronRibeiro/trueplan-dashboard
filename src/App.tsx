@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "./components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { useChamadoService } from "./app/services/chamados.service";
@@ -49,6 +49,7 @@ import { FormSubmitHandler } from "react-hook-form";
 import { Chamado } from "./app/models/chamado";
 import { ChamadoTable } from "./components/patterns/ChamadoTable";
 import { DatasAbertura } from "./app/models/utils/DatasAberturas";
+import { FormChamado } from "./components/patterns/FormChamado";
 
 export function App() {
   const [open, setOpen] = useState(false);
@@ -123,6 +124,7 @@ export function App() {
     });
   };
 
+  const formRef = React.useRef<HTMLFormElement>(null);
   // const handleSubmit = (data: Chamado) => {
   //   chamadoService
   //     .salvarChamado(data)
@@ -154,7 +156,8 @@ export function App() {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-full w-full rounded-md border p-4">
-            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            <FormChamado ref={formRef} />
+            <form className="space-y-4" onSubmit={() => handleSubmit(onSubmit)}>
               <div className="grid grid-cols-6 gap-3">
                 <div className="flex-col space-y-2 col-span-6">
                   <Label htmlFor="descricaoProblema">Cliente*</Label>
@@ -188,15 +191,13 @@ export function App() {
                           <CommandGroup>
                             {clientes.map((clientes) => (
                               <CommandItem
-                                key={clientes.id}
+                                key={clientes.nomeFantasia.trim()}
                                 value={clientes.nomeFantasia.trim()}
                                 onSelect={(currentValue) => {
                                   setValue(
-                                    currentValue === value
-                                      ? ""
-                                      : currentValue || ""
+                                    currentValue === value ? "" : currentValue
                                   );
-                                  setCliente(value);
+                                  //setCliente(value);
                                   setOpen(false);
                                 }}
                               >
@@ -352,9 +353,10 @@ export function App() {
             {datasAberturas.map((_datas) => (
               <>
                 <TabsTrigger
-                  value={_datas}
                   key={_datas}
-                  onClick={handleChangeTab(_datas)}
+                  className="transition-all duration-300"
+                  value={_datas}
+                  onClick={() => handleChangeTab(_datas)}
                 >
                   {_datas.replace("-", "/").replace("-", "/")}
                 </TabsTrigger>
@@ -365,8 +367,11 @@ export function App() {
 
         {datasAberturas.map((_datas) => (
           <>
-            <TabsContent value={_datas} key={_datas}>
-              <ChamadoTable chamados={chamados} />
+            <TabsContent value={_datas}>
+              <ChamadoTable
+                chamados={chamados}
+                className="transition-bounce duration-300"
+              />
             </TabsContent>
           </>
         ))}
