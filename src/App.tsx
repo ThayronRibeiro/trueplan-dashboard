@@ -49,7 +49,8 @@ import { FormSubmitHandler } from "react-hook-form";
 import { Chamado } from "./app/models/chamado";
 import { ChamadoTable } from "./components/patterns/ChamadoTable";
 import { DatasAbertura } from "./app/models/utils/DatasAberturas";
-import { FormChamado } from "./components/patterns/FormChamado";
+import { FormChamado, FormSchema } from "./components/patterns/FormChamado";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export function App() {
   const [open, setOpen] = useState(false);
@@ -64,12 +65,6 @@ export function App() {
   const chamadoService = useChamadoService();
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
-
-  const [activeTab, setActiveTab] = useState(0);
-
-  const triggerRef = useRef<HTMLDivElement>(null);
-
-  let data;
 
   const {
     register,
@@ -99,24 +94,6 @@ export function App() {
     });
   }, []);
 
-  useEffect(() => {
-    const elemento = triggerRef.current;
-    if (elemento) {
-      elemento.addEventListener("click", handleTeste);
-    }
-
-    // Removendo o event listener quando o componente for desmontado
-    return () => {
-      if (elemento) {
-        elemento.removeEventListener("click", handleTeste);
-      }
-    };
-  }, []);
-
-  const handleTeste = () => {
-    console.log("Teste");
-  };
-
   const handleChangeTab = (data: string) => {
     chamadoService.listarChamadosPorData(data).then((value) => {
       console.log("Dados retornados de listarChamadosPorData:", value);
@@ -124,7 +101,10 @@ export function App() {
     });
   };
 
-  const formRef = React.useRef<HTMLFormElement>(null);
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  });
+
   // const handleSubmit = (data: Chamado) => {
   //   chamadoService
   //     .salvarChamado(data)
@@ -156,179 +136,7 @@ export function App() {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-full w-full rounded-md border p-4">
-            <FormChamado ref={formRef} />
-            <form className="space-y-4" onSubmit={() => handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-6 gap-3">
-                <div className="flex-col space-y-2 col-span-6">
-                  <Label htmlFor="descricaoProblema">Cliente*</Label>
-                  <Popover
-                    open={open}
-                    onOpenChange={setOpen}
-                    {...register("usuario", { required: true })}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full justify-between"
-                      >
-                        {value
-                          ? clientes.find(
-                              (clientes) => clientes.nomeFantasia === value
-                            )?.nomeFantasia
-                          : "Selecione o cliente..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="h-full w-[500px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Selecione o cliente..." />
-                        <CommandList>
-                          <CommandEmpty>
-                            Nenhum cliente encontrado.
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {clientes.map((clientes) => (
-                              <CommandItem
-                                key={clientes.nomeFantasia.trim()}
-                                value={clientes.nomeFantasia.trim()}
-                                onSelect={(currentValue) => {
-                                  setValue(
-                                    currentValue === value ? "" : currentValue
-                                  );
-                                  //setCliente(value);
-                                  setOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    value === clientes.nomeFantasia
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {clientes.nomeFantasia}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex-col space-y-2 col-span-1">
-                  <Label htmlFor="descricaoProblema">Prioridade*</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Prioridade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="URGENTE">Urgente</SelectItem>
-                      <SelectItem value="ALTA">Alta</SelectItem>
-                      <SelectItem value="MEDIA">Média</SelectItem>
-                      <SelectItem value="BAIXA">Baixa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-col space-y-2 col-span-2">
-                  <Label htmlFor="contato">Contato*</Label>
-                  <Input id="contato" placeholder="Digite o nome do contato" />
-                </div>
-                <div className="flex-col space-y-2 col-span-1">
-                  <Label htmlFor="telefone1">Telefone*</Label>
-                  <Input
-                    id="telefone1"
-                    placeholder="Digite o telefone do contato"
-                  />
-                </div>
-                <div className="flex-col space-y-2 col-span-1">
-                  <Label htmlFor="telefone1">Telefone 2</Label>
-                  <Input
-                    id="telefone2"
-                    placeholder="Digite o segundo telefone do contato"
-                  />
-                </div>
-                <div className="flex-col space-y-2 col-span-1">
-                  <Label htmlFor="categoria">Categoria*</Label>
-                  <Popover open={open2} onOpenChange={setOpen2}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open2}
-                        className="w-full justify-between"
-                      >
-                        {value
-                          ? categorias.find(
-                              (categorias) => categorias.descricao === value2
-                            )?.descricao
-                          : "Selecione a categoria"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="h-full w-min-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Selecione a categoria..." />
-                        <CommandList>
-                          <CommandEmpty>
-                            Nenhum categoria encontrada.
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {categorias.map((categorias) => (
-                              <CommandItem
-                                key={categorias.id}
-                                value={categorias.descricao.trim()}
-                                onSelect={(currentValue) => {
-                                  setValue2(
-                                    currentValue === value2
-                                      ? ""
-                                      : currentValue || ""
-                                  );
-                                  setOpen2(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    value2 === categorias.descricao
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {categorias.descricao}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-6 gap-3">
-                <div className="flex-col space-y-2 col-span-4">
-                  <Label htmlFor="descricaoProblema">
-                    Descrição do problema*
-                  </Label>
-                  <Textarea
-                    className="max-h-[75px]"
-                    id="descricaoProblema"
-                    placeholder="Digite a descrição do problema"
-                  />
-                </div>
-              </div>
-              <div className="flex-col space-y-2">
-                <Label htmlFor="observacao">Observacão (Opcional)</Label>
-                <Textarea
-                  className="max-h-[75px]"
-                  id="observacao"
-                  placeholder="Digite uma observação sobre chamado"
-                />
-              </div>
-            </form>
+            <FormChamado />
           </ScrollArea>
           <DialogFooter>
             <DialogClose asChild>
@@ -368,10 +176,7 @@ export function App() {
         {datasAberturas.map((_datas) => (
           <>
             <TabsContent value={_datas}>
-              <ChamadoTable
-                chamados={chamados}
-                className="transition-bounce duration-300"
-              />
+              <ChamadoTable chamados={chamados} />
             </TabsContent>
           </>
         ))}
