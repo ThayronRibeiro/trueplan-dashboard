@@ -1,3 +1,4 @@
+import { Categoria } from "../categoria";
 import { Cliente } from "../cliente";
 import { Usuario } from "../usuario";
 
@@ -11,10 +12,10 @@ export interface Chamado {
   cliente: Cliente;
   contato: string;
   telefone1: string;
-  telefone2: string;
+  telefone2: string | undefined;
   tecnico?: string;
   tecnico2?: string;
   usuario: Usuario;
-  categoria: string;
-  observacao: string;
+  categoria: Categoria;
+  observacao: string | undefined;
 }
