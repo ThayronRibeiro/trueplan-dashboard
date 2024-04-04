@@ -27,7 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
+import React, { ElementType, ReactNode, useEffect, useState } from "react";
 import { Cliente } from "@/app/models/cliente";
 import { Categoria } from "@/app/models/categoria";
 import { useClienteService } from "@/app/services/clientes.service";
@@ -67,7 +67,11 @@ export const FormSchema = z.object({
   observacao: z.optional(z.string()),
 });
 
-export const FormChamado = () => {
+interface FormChamadoProps {
+  children: any;
+}
+
+export const FormChamado = ({ children }: FormChamadoProps) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -112,7 +116,7 @@ export const FormChamado = () => {
         dataCadastro: "",
         ultimoAcesso: "",
       },
-      prioridade: data.prioridade,
+      prioridade: data.prioridade.valueOf(),
       contato: data.contato,
       status: {
         id: "1",
@@ -120,13 +124,15 @@ export const FormChamado = () => {
         corBackground: "",
         corLetras: "",
       },
+      dataAbertura: "",
+      observacao: data.observacao,
     };
 
     chamadoService.salvarChamado(chamadoSave).then(() => {
       console.log("Teste");
     });
 
-    console.log(data);
+    console.log(chamadoSave);
     toast({
       title: "You submitted the following values:",
       description: (
@@ -138,306 +144,298 @@ export const FormChamado = () => {
   }
 
   return (
-    <ScrollArea className="h-full w-full rounded-md border p-4">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="cliente_id"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Cliente * </FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between opacity-80",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? clientes?.find(
-                              (cliente) =>
-                                cliente.id?.toString() === field.value
-                            )?.nomeFantasia
-                          : "Selecione o cliente"}
-                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[30rem] p-0">
-                    <Command>
-                      <CommandInput
-                        placeholder="Selecione o cliente..."
-                        className="h-9"
-                      />
-                      <CommandList>
-                        <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
-                        <CommandGroup>
-                          {clientes?.map((cliente) => (
-                            <CommandItem
-                              value={cliente.nomeFantasia}
-                              key={cliente.id}
-                              onClick={() => {
-                                form.setValue(
-                                  "cliente_id",
-                                  cliente.id?.toString() ?? ""
-                                );
-                              }}
-                              onSelect={() => {
-                                form.setValue(
-                                  "cliente_id",
-                                  cliente.id?.toString() ?? ""
-                                );
-                              }}
-                            >
-                              {`${cliente.id} - ${cliente.nomeFantasia}`}
-
-                              <CheckIcon
-                                className={cn(
-                                  "ml-auto h-4 w-4",
-                                  cliente.id?.toString() === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-6 gap-3">
-            <div className="col-span-1">
-              <FormField
-                control={form.control}
-                name="prioridade"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel htmlFor="prioridade">Prioridade * </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="cliente_id"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Cliente * </FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between opacity-80",
+                        !field.value && "text-muted-foreground"
+                      )}
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Prioridade" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="URGENTE">Urgente</SelectItem>
-                        <SelectItem value="ALTA">Alta</SelectItem>
-                        <SelectItem value="MEDIA">Média</SelectItem>
-                        <SelectItem value="BAIXA">Baixa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <FormField
-                control={form.control}
-                name="contato"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel htmlFor="contato">Contato * </FormLabel>
-                    <Input
-                      placeholder="Digite o nome do contato"
-                      {...field}
-                      onChange={(e) => {
-                        form.setValue("contato", e.target.value.toUpperCase());
-                      }}
+                      {field.value
+                        ? clientes?.find(
+                            (cliente) => cliente.id?.toString() === field.value
+                          )?.nomeFantasia
+                        : "Selecione o cliente"}
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[30rem] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Selecione o cliente..."
+                      className="h-9"
                     />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="col-span-1">
-              <FormField
-                control={form.control}
-                name="telefone1"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel htmlFor="telefone1">Telefone * </FormLabel>
-                    <Input
-                      placeholder="Digite o telefone do contato"
-                      {...field}
-                      onChange={(e) => {
-                        form.setValue("telefone1", e.target.value);
-                      }}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="col-span-1">
-              <FormField
-                control={form.control}
-                name="telefone2"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel htmlFor="telefone2">Telefone 2 </FormLabel>
-                    <Input
-                      placeholder="Digite o telefone do contato"
-                      {...field}
-                      onChange={(e) => {
-                        form.setValue("telefone2", e.target.value);
-                      }}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="col-span-1">
-              <FormField
-                control={form.control}
-                name="categoria_id"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel htmlFor="telefone2">Categoria * </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-full justify-between opacity-80",
-                              !field.value && "text-muted-foreground"
-                            )}
+                    <CommandList>
+                      <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {clientes?.map((cliente) => (
+                          <CommandItem
+                            value={cliente.nomeFantasia}
+                            key={cliente.id}
+                            onClick={() => {
+                              form.setValue(
+                                "cliente_id",
+                                cliente.id?.toString() ?? ""
+                              );
+                            }}
+                            onSelect={() => {
+                              form.setValue(
+                                "cliente_id",
+                                cliente.id?.toString() ?? ""
+                              );
+                            }}
                           >
-                            {field.value
-                              ? categorias?.find(
-                                  (categoria) =>
+                            {`${cliente.id} - ${cliente.nomeFantasia}`}
+
+                            <CheckIcon
+                              className={cn(
+                                "ml-auto h-4 w-4",
+                                cliente.id?.toString() === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-6 gap-3">
+          <div className="col-span-1">
+            <FormField
+              control={form.control}
+              name="prioridade"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel htmlFor="prioridade">Prioridade * </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Prioridade" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="URGENTE">Urgente</SelectItem>
+                      <SelectItem value="ALTA">Alta</SelectItem>
+                      <SelectItem value="MEDIA">Média</SelectItem>
+                      <SelectItem value="BAIXA">Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="col-span-2">
+            <FormField
+              control={form.control}
+              name="contato"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel htmlFor="contato">Contato * </FormLabel>
+                  <Input
+                    placeholder="Digite o nome do contato"
+                    {...field}
+                    onChange={(e) => {
+                      form.setValue("contato", e.target.value.toUpperCase());
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <FormField
+              control={form.control}
+              name="telefone1"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel htmlFor="telefone1">Telefone * </FormLabel>
+                  <Input
+                    placeholder="Digite o telefone do contato"
+                    {...field}
+                    onChange={(e) => {
+                      form.setValue("telefone1", e.target.value);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <FormField
+              control={form.control}
+              name="telefone2"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel htmlFor="telefone2">Telefone 2 </FormLabel>
+                  <Input
+                    placeholder="Digite o telefone do contato"
+                    {...field}
+                    onChange={(e) => {
+                      form.setValue("telefone2", e.target.value);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <FormField
+              control={form.control}
+              name="categoria_id"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel htmlFor="telefone2">Categoria * </FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between opacity-80",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? categorias?.find(
+                                (categoria) =>
+                                  categoria.id?.toString() === field.value
+                              )?.descricao
+                            : "Selecione a categoria"}
+                          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[13rem] p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Selecione a categoria..."
+                          className="h-9"
+                        />
+                        <CommandList>
+                          <CommandEmpty>
+                            Nenhuma categoria encontrada.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {categorias?.map((categoria) => (
+                              <CommandItem
+                                value={categoria.descricao}
+                                key={categoria.id}
+                                onClick={() => {
+                                  form.setValue(
+                                    "categoria_id",
+                                    categoria.id?.toString() ?? ""
+                                  );
+                                }}
+                                onSelect={() => {
+                                  form.setValue(
+                                    "categoria_id",
+                                    categoria.id?.toString() ?? ""
+                                  );
+                                }}
+                              >
+                                {`${categoria.id} - ${categoria.descricao}`}
+
+                                <CheckIcon
+                                  className={cn(
+                                    "ml-auto h-4 w-4",
                                     categoria.id?.toString() === field.value
-                                )?.descricao
-                              : "Selecione a categoria"}
-                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[13rem] p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Selecione a categoria..."
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              Nenhuma categoria encontrada.
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {categorias?.map((categoria) => (
-                                <CommandItem
-                                  value={categoria.descricao}
-                                  key={categoria.id}
-                                  onClick={() => {
-                                    form.setValue(
-                                      "categoria_id",
-                                      categoria.id?.toString() ?? ""
-                                    );
-                                  }}
-                                  onSelect={() => {
-                                    form.setValue(
-                                      "categoria_id",
-                                      categoria.id?.toString() ?? ""
-                                    );
-                                  }}
-                                >
-                                  {`${categoria.id} - ${categoria.descricao}`}
-
-                                  <CheckIcon
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      categoria.id?.toString() === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+        </div>
 
-          <div className="grid grid-cols-6 gap-3">
-            <div className="flex-col space-y-2 col-span-4">
-              <FormField
-                control={form.control}
-                name="descricaoProblema"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel htmlFor="descricaoProblema">
-                      Descrição do problema *{" "}
-                    </FormLabel>
-                    <Textarea
-                      className="max-h-[75px]"
-                      placeholder="Digite a descrição do problema"
-                      {...field}
-                      onChange={(e) => {
-                        form.setValue("descricaoProblema", e.target.value);
-                      }}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+        <div className="grid grid-cols-6 gap-3">
+          <div className="flex-col space-y-2 col-span-4">
+            <FormField
+              control={form.control}
+              name="descricaoProblema"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel htmlFor="descricaoProblema">
+                    Descrição do problema *{" "}
+                  </FormLabel>
+                  <Textarea
+                    className="max-h-[75px]"
+                    placeholder="Digite a descrição do problema"
+                    {...field}
+                    onChange={(e) => {
+                      form.setValue("descricaoProblema", e.target.value);
+                    }}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+        </div>
 
-          <FormField
-            control={form.control}
-            name="observacao"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Observação (Opcional) </FormLabel>
-                <Textarea
-                  className="max-h-[75px]"
-                  placeholder="Digite uma observação sobre o chamado"
-                  {...field}
-                  onChange={(e) => {
-                    form.setValue("observacao", e.target.value);
-                  }}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button
-            type="submit"
-            className="flex items-center bg-emerald-500 hover:bg-emerald-600"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Salvar
-          </Button>
-        </form>
-      </Form>
-    </ScrollArea>
+        <FormField
+          control={form.control}
+          name="observacao"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Observação (Opcional) </FormLabel>
+              <Textarea
+                className="max-h-[75px]"
+                placeholder="Digite uma observação sobre o chamado"
+                {...field}
+                onChange={(e) => {
+                  form.setValue("observacao", e.target.value);
+                }}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {children}
+      </form>
+    </Form>
   );
 };

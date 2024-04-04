@@ -136,22 +136,23 @@ export function App() {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-full w-full rounded-md border p-4">
-            <FormChamado />
+            <FormChamado>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant={"outline"}>
+                    Cancelar
+                  </Button>
+                </DialogClose>
+                <Button
+                  type="submit"
+                  className="flex items-center bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar
+                </Button>
+              </DialogFooter>
+            </FormChamado>
           </ScrollArea>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant={"outline"}>
-                Cancelar
-              </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              className="flex items-center bg-emerald-500 hover:bg-emerald-600"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Salvar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
