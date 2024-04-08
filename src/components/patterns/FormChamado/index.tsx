@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
-import React, { ElementType, ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Cliente } from "@/app/models/cliente";
 import { Categoria } from "@/app/models/categoria";
 import { useClienteService } from "@/app/services/clientes.service";
@@ -41,8 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useCategoriaService } from "@/app/services/categoria.service";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save } from "lucide-react";
+
 import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
 
@@ -68,16 +67,18 @@ export const FormSchema = z.object({
 });
 
 interface FormChamadoProps {
-  children: any;
+  openOrClose: () => void;
+  children: ReactNode;
 }
 
-export const FormChamado = ({ children }: FormChamadoProps) => {
+export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  //const navigate = useNavigate();
 
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
@@ -129,7 +130,8 @@ export const FormChamado = ({ children }: FormChamadoProps) => {
     };
 
     chamadoService.salvarChamado(chamadoSave).then(() => {
-      console.log("Teste");
+      // navigate(0);
+      openOrClose();
     });
 
     console.log(chamadoSave);
@@ -405,7 +407,10 @@ export const FormChamado = ({ children }: FormChamadoProps) => {
                     placeholder="Digite a descrição do problema"
                     {...field}
                     onChange={(e) => {
-                      form.setValue("descricaoProblema", e.target.value);
+                      form.setValue(
+                        "descricaoProblema",
+                        e.target.value.toUpperCase()
+                      );
                     }}
                   />
                   <FormMessage />
@@ -426,7 +431,7 @@ export const FormChamado = ({ children }: FormChamadoProps) => {
                 placeholder="Digite uma observação sobre o chamado"
                 {...field}
                 onChange={(e) => {
-                  form.setValue("observacao", e.target.value);
+                  form.setValue("observacao", e.target.value.toUpperCase());
                 }}
               />
               <FormMessage />
