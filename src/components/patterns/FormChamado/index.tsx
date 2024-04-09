@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,11 +77,21 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+  const [openPopoverCli, setOpenPopoverCli] = useState(false);
+  const [openPopoverCat, setOpenPopoverCat] = useState(false);
   //const navigate = useNavigate();
 
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
   const chamadoService = useChamadoService();
+
+  const formatDate = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   useEffect(() => {
     //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
@@ -130,7 +139,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     };
 
     chamadoService.salvarChamado(chamadoSave).then(() => {
-      // navigate(0);
+      localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
       openOrClose();
     });
 
@@ -154,7 +163,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Cliente * </FormLabel>
-              <Popover>
+              <Popover open={openPopoverCli} onOpenChange={setOpenPopoverCli}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -198,6 +207,9 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
                                 "cliente_id",
                                 cliente.id?.toString() ?? ""
                               );
+                            }}
+                            onDoubleClick={() => {
+                              setOpenPopoverCli(false);
                             }}
                           >
                             {`${cliente.id} - ${cliente.nomeFantasia}`}
@@ -319,7 +331,10 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel htmlFor="telefone2">Categoria * </FormLabel>
-                  <Popover>
+                  <Popover
+                    open={openPopoverCat}
+                    onOpenChange={setOpenPopoverCat}
+                  >
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -366,6 +381,9 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
                                     "categoria_id",
                                     categoria.id?.toString() ?? ""
                                   );
+                                }}
+                                onDoubleClick={() => {
+                                  setOpenPopoverCat(false);
                                 }}
                               >
                                 {`${categoria.id} - ${categoria.descricao}`}

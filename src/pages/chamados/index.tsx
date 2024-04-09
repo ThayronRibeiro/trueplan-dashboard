@@ -30,7 +30,14 @@ export const Chamados = () => {
     chamadoService.listarDatas().then((value) => {
       console.log("Dados retornados de listarDatas:", value);
       setDatasAbertura(value ?? []);
+      datasAberturas.map((data) => {
+        chamadoService.listarChamadosPorData(data).then((value) => {
+          console.log("Dados retornados de listarChamadosPorData:", value);
+          setChamados(value ?? []);
+        });
+      });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangeTab = (data: string) => {
@@ -45,6 +52,11 @@ export const Chamados = () => {
     chamadoService.listarDatas().then((value) => {
       console.log("Dados retornados de listarDatas:", value);
       setDatasAbertura(value ?? []);
+    });
+    datasAberturas.map((data: string) => {
+      chamadoService.listarChamadosPorData(data).then((value) => {
+        setChamados(value ?? []);
+      });
     });
   };
 
