@@ -10,6 +10,7 @@ export function App() {
         <Fragment>
           <Routes>
             <Route path="/" element={<Chamados />} />
+            <Route path="/categorias" element={<Chamados />} />
           </Routes>
         </Fragment>
       </BrowserRouter>
