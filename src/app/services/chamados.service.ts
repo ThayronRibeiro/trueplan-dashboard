@@ -28,9 +28,26 @@ export const useChamadoService = () => {
     return response.data;
   };
 
+  const listarChamado = async (chamado: Chamado): Promise<Chamado> => {
+    const response: AxiosResponse<Chamado> = await httpClient.get(
+      `${resourceUrl}/id/${chamado.id}`
+    );
+    return response.data;
+  };
+
+  const atualizarChamado = async (chamado: Chamado): Promise<Chamado> => {
+    const response: AxiosResponse<Chamado> = await httpClient.put(
+      `${resourceUrl}/${chamado.id}`,
+      chamado
+    );
+    return response.data;
+  };
+
   return {
     listarDatas,
     salvarChamado,
     listarChamadosPorData,
+    listarChamado,
+    atualizarChamado,
   };
 };

@@ -19,7 +19,7 @@ export const TopMenu = ({ children }: TopMenuProps) => {
     <Fragment>
       <Sheet>
         <SheetTrigger>
-          <div className="fixed top-0 w-[100vw] h-12 bg-blue-600 flex items-center justify-end p-5 z-10">
+          <div className="fixed top-0 w-[100vw] h-12 bg-blue-600 flex items-center justify-end p-5 z-20">
             <AlignJustify className="text-white mr-5" />
           </div>
         </SheetTrigger>
@@ -33,7 +33,7 @@ export const TopMenu = ({ children }: TopMenuProps) => {
           </SheetHeader>
         </SheetContent>
       </Sheet>
-      <ScrollArea className="pt-6 z-0">{children}</ScrollArea>
+      <ScrollArea className="pt-6">{children}</ScrollArea>
     </Fragment>
   );
 };
