@@ -37,7 +37,7 @@ export const useChamadoService = () => {
 
   const atualizarChamado = async (chamado: Chamado): Promise<Chamado> => {
     const response: AxiosResponse<Chamado> = await httpClient.put(
-      `${resourceUrl}/${chamado.id}`,
+      `${resourceUrl}/id/${chamado.id}`,
       chamado
     );
     return response.data;

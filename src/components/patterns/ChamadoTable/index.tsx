@@ -17,40 +17,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  CheckIcon,
-  Clock,
-  Command,
-  Hand,
-  Repeat,
-  SquareCheckBig,
-  X,
-} from "lucide-react";
+import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
 import { MyTooltip } from "../Tooltip";
 import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import { CaretSortIcon } from "@radix-ui/react-icons";
-
-import {
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from "cmdk";
-import { Button } from "react-day-picker";
-import { useCategoriaService } from "@/app/services/categoria.service";
-import { useClienteService } from "@/app/services/clientes.service";
-
-import { Categoria } from "@/app/models/categoria";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ChamadoTableProps {
   chamados: Chamado[];
@@ -58,29 +31,9 @@ interface ChamadoTableProps {
 
 export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
   const chamadoService = useChamadoService();
-  const clienteService = useClienteService();
-  const categoriaService = useCategoriaService();
   const [open, setOpen] = useState(false);
-  const [openPopoverCat, setOpenPopoverCat] = useState(false);
 
-  const [value, setValue] = useState("");
-
-  // const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-
-  useEffect(() => {
-    //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
-    clienteService.listarTodosOsClientes().then((value) => {
-      console.log("Dados retornados de listarTodosOsClientes:", value);
-      // setClientes(value ?? []);
-    });
-    //Adquirindo a lista de categorias para serem utilizadas como fonte de dados no combobox
-    categoriaService.listarTodasAsCategorias().then((value) => {
-      console.log("Dados retornados de listarTodasAsCategorias:", value);
-      setCategorias(value ?? []);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const navigate = useNavigate();
 
   const notifyCancelSucces = () =>
     toast.success("Cancelado com sucesso!", {
@@ -114,17 +67,23 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
   };
 
   const handleCancel = async (chamado: Chamado) => {
-    //Configurar um endpoint no Spring para receber o novo status e persstir no banco de dados
+    const chamadoEncontrado = await chamadoService.listarChamado(chamado);
 
-    chamado.status.id = "3";
-    chamadoService
-      .atualizarChamado(chamado)
-      .then(() => {
-        notifyCancelSucces();
-      })
-      .catch(() => {
-        notifyCancelError();
-      });
+    console.log(chamadoEncontrado);
+
+    if (chamadoEncontrado) {
+      chamadoEncontrado.status.id = "3";
+      chamadoService
+        .atualizarChamado(chamadoEncontrado)
+        .then((value) => {
+          notifyCancelSucces();
+          navigate("/");
+          console.log(value);
+        })
+        .catch(() => {
+          notifyCancelError();
+        });
+    }
   };
 
   return (
@@ -140,7 +99,7 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
             <TableHead className="w-[220px]">Cliente</TableHead>
             <TableHead className="w-[120px]">Contato</TableHead>
             <TableHead className="w-[125px]">Telefone</TableHead>
-            <TableHead className="w-[380px]">Descrição do problema</TableHead>
+            <TableHead className="w-[300px]">Descrição do problema</TableHead>
             <TableHead>Observação</TableHead>
           </TableRow>
         </TableHeader>
@@ -150,7 +109,7 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
               <DialogTrigger asChild>
                 <TableRow key={chamado.id}>
                   <TableCell
-                    className="font-medium hover:opacity-90 items-center justify-center flex"
+                    className="font-medium hover:opacity-90 items-center justify-center flex h-[55px]"
                     style={{
                       backgroundColor: `#${chamado.status.corBackground}`,
                       color: `#${chamado.status.corLetras}`,
@@ -163,7 +122,13 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
                   <TableCell>{chamado.cliente.nomeFantasia}</TableCell>
                   <TableCell>{chamado.contato}</TableCell>
                   <TableCell>{chamado.telefone1}</TableCell>
-                  <TableCell>{chamado.descricaoProblema}</TableCell>
+                  <TableCell className="whitespace-normal break-all">
+                    {chamado.descricaoProblema.length >= 45 ? (
+                      <>{chamado.descricaoProblema.substring(0, 62)}...</>
+                    ) : (
+                      <>{chamado.descricaoProblema}</>
+                    )}
+                  </TableCell>
                 </TableRow>
               </DialogTrigger>
               <DialogContent className="min-w-[50%] min-h-[70%]">
