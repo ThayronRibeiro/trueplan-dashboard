@@ -13,17 +13,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusCircle, Save } from "lucide-react";
-import { Chamado } from "@/app/models/chamado";
+// import { Chamado } from "@/app/models/chamado";
 import { ChamadoTable } from "@/components/patterns/ChamadoTable";
 import { FormChamado } from "@/components/patterns/FormChamado";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useQuery } from "@tanstack/react-query";
 
 export const Chamados = () => {
   const [open, setOpen] = useState(false);
 
-  const [chamados, setChamados] = useState<Chamado[]>([]);
+  //const [chamados, setChamados] = useState<Chamado[]>([]);
   const [datasAberturas, setDatasAbertura] = useState<string[]>([]);
   const chamadoService = useChamadoService();
+
+  const { data: datasChamados } = useQuery({
+    queryKey: ["datasChamados"],
+    queryFn: chamadoService.listarDatas,
+  });
 
   useEffect(() => {
     //Adquirindo a lista de datas para preencher as tabs de organização dos chamados
@@ -33,7 +39,7 @@ export const Chamados = () => {
       datasAberturas.map((data) => {
         chamadoService.listarChamadosPorData(data).then((value) => {
           console.log("Dados retornados de listarChamadosPorData:", value);
-          setChamados(value ?? []);
+          //setChamados(value ?? []);
         });
       });
     });
@@ -43,7 +49,7 @@ export const Chamados = () => {
   const handleChangeTab = (data: string) => {
     chamadoService.listarChamadosPorData(data).then((value) => {
       console.log("Dados retornados de listarChamadosPorData:", value);
-      setChamados(value ?? []);
+      //setChamados(value ?? []);
     });
   };
 
@@ -53,11 +59,11 @@ export const Chamados = () => {
       console.log("Dados retornados de listarDatas:", value);
       setDatasAbertura(value ?? []);
     });
-    datasAberturas.map((data: string) => {
-      chamadoService.listarChamadosPorData(data).then((value) => {
-        setChamados(value ?? []);
-      });
-    });
+    // datasAberturas.map((data: string) => {
+    //   chamadoService.listarChamadosPorData(data).then((value) => {
+    //     //setChamados(value ?? []);
+    //   });
+    // });
   };
 
   return (
@@ -103,7 +109,7 @@ export const Chamados = () => {
       <Tabs orientation="horizontal">
         <TabsList>
           <>
-            {datasAberturas.map((_datas) => (
+            {datasChamados?.map((_datas) => (
               <>
                 <TabsTrigger
                   key={_datas}
@@ -118,10 +124,10 @@ export const Chamados = () => {
           </>
         </TabsList>
 
-        {datasAberturas.map((_datas) => (
+        {datasChamados?.map((_datas) => (
           <>
             <TabsContent value={_datas}>
-              <ChamadoTable chamados={chamados} />
+              <ChamadoTable dataChamado={_datas} />
             </TabsContent>
           </>
         ))}

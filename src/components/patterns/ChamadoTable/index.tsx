@@ -23,17 +23,45 @@ import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 interface ChamadoTableProps {
-  chamados: Chamado[];
+  dataChamado: string;
 }
 
-export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
+export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
   const chamadoService = useChamadoService();
   const [open, setOpen] = useState(false);
 
-  const navigate = useNavigate();
+  const { data: chamados, isLoading } = useQuery({
+    queryKey: ["chamados"],
+    queryFn: async () => {
+      return chamadoService.listarChamadosPorData(dataChamado);
+    },
+  });
+
+  const { mutateAsync: handleCancel } = useMutation({
+    mutationKey: ["chamados"],
+    mutationFn: async (variables: Chamado) => {
+      const chamadoEncontrado = chamadoService.listarChamado(variables);
+
+      if (chamadoEncontrado) {
+        (await chamadoEncontrado).status.id = "3";
+        chamadoService
+          .atualizarChamado(await chamadoEncontrado)
+          .then(() => {
+            notifyCancelSucces();
+          })
+          .catch(() => {
+            notifyCancelError();
+          });
+      }
+
+      return chamadoEncontrado;
+    },
+  });
+
+  console.log("REsultado:", chamados);
 
   const notifyCancelSucces = () =>
     toast.success("Cancelado com sucesso!", {
@@ -66,25 +94,25 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
     chamado.status.id = "2";
   };
 
-  const handleCancel = async (chamado: Chamado) => {
-    const chamadoEncontrado = await chamadoService.listarChamado(chamado);
+  // const handleCancel = async (chamado: Chamado) => {
+  //   const chamadoEncontrado = await chamadoService.listarChamado(chamado);
 
-    console.log(chamadoEncontrado);
+  //   console.log(chamadoEncontrado);
 
-    if (chamadoEncontrado) {
-      chamadoEncontrado.status.id = "3";
-      chamadoService
-        .atualizarChamado(chamadoEncontrado)
-        .then((value) => {
-          notifyCancelSucces();
-          navigate("/");
-          console.log(value);
-        })
-        .catch(() => {
-          notifyCancelError();
-        });
-    }
-  };
+  //   if (chamadoEncontrado) {
+  //     chamadoEncontrado.status.id = "3";
+  //     chamadoService
+  //       .atualizarChamado(chamadoEncontrado)
+  //       .then((value) => {
+  //         notifyCancelSucces();
+  //         navigate("/");
+  //         console.log(value);
+  //       })
+  //       .catch(() => {
+  //         notifyCancelError();
+  //       });
+  //   }
+  // };
 
   return (
     <div className="rounded-md border ">
@@ -104,7 +132,8 @@ export const ChamadoTable = ({ chamados }: ChamadoTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {chamados.map((chamado) => (
+          {isLoading && <p> Carregando... </p>}
+          {chamados?.map((chamado) => (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <TableRow key={chamado.id}>

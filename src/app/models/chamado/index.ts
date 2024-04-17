@@ -3,7 +3,7 @@ import { Cliente } from "../cliente";
 import { Usuario } from "../usuario";
 
 export interface Chamado {
-  id?: number;
+  id?: number | undefined;
   descricaoProblema: string;
   status: StatusChamado;
   dataAbertura: string;
