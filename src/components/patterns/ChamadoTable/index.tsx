@@ -38,6 +38,7 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
     queryFn: async () => {
       return chamadoService.listarChamadosPorData(dataChamado);
     },
+    refetchInterval: 5000,
   });
 
   const { mutateAsync: handleCancel } = useMutation({
