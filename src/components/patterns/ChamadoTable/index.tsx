@@ -23,7 +23,7 @@ import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ChamadoTableProps {
   dataChamado: string;
@@ -31,18 +31,19 @@ interface ChamadoTableProps {
 
 export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
   const chamadoService = useChamadoService();
+
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
 
   const { data: chamados, isLoading } = useQuery({
     queryKey: ["chamados"],
-    queryFn: async () => {
+    queryFn: () => {
       return chamadoService.listarChamadosPorData(dataChamado);
     },
-    refetchInterval: 5000,
   });
 
   const { mutateAsync: handleCancel } = useMutation({
-    mutationKey: ["chamados"],
     mutationFn: async (variables: Chamado) => {
       const chamadoEncontrado = chamadoService.listarChamado(variables);
 
@@ -57,8 +58,14 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
             notifyCancelError();
           });
       }
-
-      return chamadoEncontrado;
+    },
+    onSuccess() {
+      queryClient.prefetchQuery({
+        queryKey: ["chamados"],
+        queryFn: () => {
+          return chamadoService.listarChamadosPorData(dataChamado);
+        },
+      });
     },
   });
 
@@ -210,7 +217,6 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                   </div>
                   <div className="grid grid-cols-6 gap-3 mt-10">
                     <div className="col-span-2">
-                      TEste
                       {/* <Popover
                         open={openPopoverCat}
                         onOpenChange={setOpenPopoverCat}

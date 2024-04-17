@@ -17,7 +17,7 @@ import { PlusCircle, Save } from "lucide-react";
 import { ChamadoTable } from "@/components/patterns/ChamadoTable";
 import { FormChamado } from "@/components/patterns/FormChamado";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const Chamados = () => {
   const [open, setOpen] = useState(false);
@@ -29,6 +29,18 @@ export const Chamados = () => {
   const { data: datasChamados } = useQuery({
     queryKey: ["datasChamados"],
     queryFn: chamadoService.listarDatas,
+    refetchInterval: 60000,
+  });
+
+  const { mutateAsync: handleClose } = useMutation({
+    mutationKey: ["chamados"],
+    mutationFn: async () => {
+      setOpen(false);
+      chamadoService.listarDatas().then((value) => {
+        console.log("Dados retornados de listarDatas:", value);
+        datasChamados;
+      });
+    },
   });
 
   useEffect(() => {
@@ -86,7 +98,7 @@ export const Chamados = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-full w-full rounded-md border p-4">
-            <FormChamado openOrClose={handleCloseDialog}>
+            <FormChamado openOrClose={handleClose}>
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant={"outline"}>
