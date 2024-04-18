@@ -139,7 +139,9 @@ export const Chamados = () => {
         {datasChamados?.map((_datas) => (
           <>
             <TabsContent value={_datas}>
-              <ChamadoTable dataChamado={_datas} />
+              <ScrollArea className="h-[75vh] w-full rounded-md border">
+                <ChamadoTable dataChamado={_datas} />
+              </ScrollArea>
             </TabsContent>
           </>
         ))}

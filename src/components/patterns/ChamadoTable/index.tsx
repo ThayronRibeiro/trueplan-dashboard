@@ -1,14 +1,5 @@
 import { Chamado } from "@/app/models/chamado";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
   Table,
   TableBody,
   TableCaption,
@@ -17,13 +8,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
-import { MyTooltip } from "../Tooltip";
 import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MyTooltip } from "../Tooltip";
+import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface ChamadoTableProps {
   dataChamado: string;
@@ -53,23 +53,19 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
           .atualizarChamado(await chamadoEncontrado)
           .then(() => {
             notifyCancelSucces();
+            queryClient.prefetchQuery({
+              queryKey: ["chamados"],
+              queryFn: () => {
+                return chamadoService.listarChamadosPorData(dataChamado);
+              },
+            });
           })
           .catch(() => {
             notifyCancelError();
           });
       }
     },
-    onSuccess() {
-      queryClient.prefetchQuery({
-        queryKey: ["chamados"],
-        queryFn: () => {
-          return chamadoService.listarChamadosPorData(dataChamado);
-        },
-      });
-    },
   });
-
-  console.log("REsultado:", chamados);
 
   const notifyCancelSucces = () =>
     toast.success("Cancelado com sucesso!", {
@@ -142,7 +138,7 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
         <TableBody>
           {isLoading && <p> Carregando... </p>}
           {chamados?.map((chamado) => (
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog>
               <DialogTrigger asChild>
                 <TableRow key={chamado.id}>
                   <TableCell
@@ -168,23 +164,22 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                   </TableCell>
                 </TableRow>
               </DialogTrigger>
-              <DialogContent className="min-w-[50%] min-h-[70%]">
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Chamado #{chamado.id}</DialogTitle>
-                  <DialogDescription className="text-lg">
+                  <DialogDescription>
                     {chamado.cliente.nomeFantasia}
                   </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-full w-full rounded-md border p-4">
                   <div className="flex w-full justify-between">
-                    <div className="flex w-full items-center justify-end gap-3">
+                    <div className="flex w-full items-center gap-3">
                       {chamado.status.id && (
                         <>
-                          {!chamado.tecnico && (
-                            <div className="flex w-full h-8 p-2 cursor-pointer items-center justify-center gap-2 bg-slate-800 hover:opacity-85 rounded-md text-white">
+                          {!chamado.tecnico && chamado.status.id != "3" && (
+                            <div className="flex w-100 h-8 p-2 cursor-pointer items-center justify-center gap-2 bg-slate-800 hover:opacity-85 rounded-md text-white">
                               <>
                                 <Hand className="w-4 h-4" /> Pegar chamado
-                                {chamado.status.id}
                               </>
                             </div>
                           )}
@@ -198,81 +193,21 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                             <X
                               className="bg-red-500 p-1 rounded-sm cursor-pointer"
                               onClick={() => {
-                                setOpen(false);
                                 handleCancel(chamado);
+                                //setOpen(false);
                               }}
                             />
                           </MyTooltip>
                           <MyTooltip text="Finalizar chamado">
                             <SquareCheckBig
                               className="bg-green-400 p-1 rounded-sm cursor-pointer"
-                              onClick={() => {
-                                handleFinally(chamado);
-                              }}
+                              //   onClick={() => {
+                              //     handleFinally(chamado);
+                              //   }}
                             />
                           </MyTooltip>
                         </>
                       )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-6 gap-3 mt-10">
-                    <div className="col-span-2">
-                      {/* <Popover
-                        open={openPopoverCat}
-                        onOpenChange={setOpenPopoverCat}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            role="combobox"
-                            aria-expanded={openPopoverCat}
-                            className="justify-between"
-                          >
-                            {value
-                              ? categorias.find(
-                                  (categoria) => categoria.id === value
-                                )?.descricao
-                              : "Select framework..."}
-                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="Search framework..."
-                              className="h-9"
-                            />
-                            <CommandEmpty>No framework found.</CommandEmpty>
-                            <CommandList>
-                              <CommandGroup>
-                                {categorias.map((categoria) => (
-                                  <CommandItem
-                                    key={categoria.descricao}
-                                    value={categoria.id}
-                                    onSelect={(currentValue) => {
-                                      setValue(
-                                        currentValue === value
-                                          ? ""
-                                          : currentValue
-                                      );
-                                      setOpenPopoverCat(false);
-                                    }}
-                                  >
-                                    {categoria.descricao}
-                                    <CheckIcon
-                                      className={cn(
-                                        "ml-auto h-4 w-4",
-                                        value === categoria.id
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover> */}
                     </div>
                   </div>
                 </ScrollArea>

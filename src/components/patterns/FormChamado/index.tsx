@@ -45,7 +45,7 @@ import { useChamadoService } from "@/app/services/chamados.service";
 
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const FormSchema = z.object({
   cliente_id: z.string({
@@ -78,6 +78,8 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     resolver: zodResolver(FormSchema),
   });
 
+  const queryClient = useQueryClient();
+
   const { mutateAsync: onSubmit }: any = useMutation({
     mutationKey: ["chamados"],
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
@@ -103,9 +105,6 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
         contato: data.contato,
         status: {
           id: "1",
-          descricao: "",
-          corBackground: "",
-          corLetras: "",
         },
         dataAbertura: "",
         observacao: data.observacao,
@@ -115,6 +114,12 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
         localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
         openOrClose();
         notifySaveSucces();
+        queryClient.prefetchQuery({
+          queryKey: ["datasChamados"],
+          queryFn: () => {
+            return chamadoService.listarDatas();
+          },
+        });
       });
     },
   });
