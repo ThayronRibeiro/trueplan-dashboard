@@ -18,6 +18,7 @@ import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -119,7 +120,7 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
   // };
 
   return (
-    <div className="rounded-md border ">
+    <>
       <ToastContainer />
       <Table>
         <TableCaption>Todos os chamados desta data.</TableCaption>
@@ -190,13 +191,15 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                             <Repeat className="bg-orange-400 p-1 rounded-sm cursor-pointer" />
                           </MyTooltip>
                           <MyTooltip text="Cancelar chamado">
-                            <X
-                              className="bg-red-500 p-1 rounded-sm cursor-pointer"
-                              onClick={() => {
-                                handleCancel(chamado);
-                                //setOpen(false);
-                              }}
-                            />
+                            <DialogClose asChild>
+                              <X
+                                className="bg-red-500 p-1 rounded-sm cursor-pointer"
+                                onClick={() => {
+                                  handleCancel(chamado);
+                                  //setOpen(false);
+                                }}
+                              />
+                            </DialogClose>
                           </MyTooltip>
                           <MyTooltip text="Finalizar chamado">
                             <SquareCheckBig
@@ -216,6 +219,6 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </>
   );
 };

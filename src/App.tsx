@@ -5,16 +5,16 @@ import { TopMenu } from "./components/patterns/TopMenu";
 
 export function App() {
   return (
-    <TopMenu>
-      <BrowserRouter>
+    <BrowserRouter>
+      <TopMenu>
         <Fragment>
           <Routes>
             <Route path="/" element={<Chamados />} />
             <Route path="/categorias" element={<Chamados />} />
           </Routes>
         </Fragment>
-      </BrowserRouter>
-    </TopMenu>
+      </TopMenu>
+    </BrowserRouter>
   );
 }
 
