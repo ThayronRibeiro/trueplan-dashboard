@@ -11,7 +11,7 @@ import {
 import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useState } from "react";
+// import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyTooltip } from "../Tooltip";
 import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
@@ -35,7 +35,7 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
 
   const queryClient = useQueryClient();
 
-  const [open, setOpen] = useState(false);
+  //const [open, setOpen] = useState(false);
 
   const { data: chamados, isLoading } = useQuery({
     queryKey: ["chamados"],
@@ -94,10 +94,10 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
       transition: Bounce,
     });
 
-  const handleFinally = (chamado: Chamado) => {
-    //Configurar um endpoint no Spring para receber o novo status e persstir no banco de dados
-    chamado.status.id = "2";
-  };
+  // const handleFinally = (chamado: Chamado) => {
+  //   //Configurar um endpoint no Spring para receber o novo status e persstir no banco de dados
+  //   chamado.status.id = "2";
+  // };
 
   // const handleCancel = async (chamado: Chamado) => {
   //   const chamadoEncontrado = await chamadoService.listarChamado(chamado);

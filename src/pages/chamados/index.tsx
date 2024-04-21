@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChamadoService } from "@/app/services/chamados.service";
@@ -22,8 +22,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 export const Chamados = () => {
   const [open, setOpen] = useState(false);
 
-  //const [chamados, setChamados] = useState<Chamado[]>([]);
-  const [datasAberturas, setDatasAbertura] = useState<string[]>([]);
   const chamadoService = useChamadoService();
 
   const { data: datasChamados } = useQuery({
@@ -43,39 +41,11 @@ export const Chamados = () => {
     },
   });
 
-  useEffect(() => {
-    //Adquirindo a lista de datas para preencher as tabs de organização dos chamados
-    chamadoService.listarDatas().then((value) => {
-      console.log("Dados retornados de listarDatas:", value);
-      setDatasAbertura(value ?? []);
-      datasAberturas.map((data) => {
-        chamadoService.listarChamadosPorData(data).then((value) => {
-          console.log("Dados retornados de listarChamadosPorData:", value);
-          //setChamados(value ?? []);
-        });
-      });
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleChangeTab = (data: string) => {
     chamadoService.listarChamadosPorData(data).then((value) => {
       console.log("Dados retornados de listarChamadosPorData:", value);
       //setChamados(value ?? []);
     });
-  };
-
-  const handleCloseDialog = () => {
-    setOpen(false);
-    chamadoService.listarDatas().then((value) => {
-      console.log("Dados retornados de listarDatas:", value);
-      setDatasAbertura(value ?? []);
-    });
-    // datasAberturas.map((data: string) => {
-    //   chamadoService.listarChamadosPorData(data).then((value) => {
-    //     //setChamados(value ?? []);
-    //   });
-    // });
   };
 
   return (

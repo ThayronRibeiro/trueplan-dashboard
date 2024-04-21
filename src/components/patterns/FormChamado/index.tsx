@@ -80,6 +80,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
 
   const queryClient = useQueryClient();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { mutateAsync: onSubmit }: any = useMutation({
     mutationKey: ["chamados"],
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
@@ -112,12 +113,21 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
 
       chamadoService.salvarChamado(chamadoSave).then(() => {
         localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
+        console.log(chamadoSave.dataAbertura);
         openOrClose();
         notifySaveSucces();
         queryClient.prefetchQuery({
           queryKey: ["datasChamados"],
           queryFn: () => {
             return chamadoService.listarDatas();
+          },
+        });
+        queryClient.fetchQuery({
+          queryKey: ["chamados"],
+          queryFn: () => {
+            return chamadoService.listarChamadosPorData(
+              localStorage.getItem("dataChamadoAtivo") ?? ""
+            );
           },
         });
       });
@@ -333,6 +343,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
                       onChange={(e) => {
                         form.setValue("contato", e.target.value.toUpperCase());
                       }}
+                      autoComplete="false"
                     />
                     <FormMessage />
                   </FormItem>
@@ -353,6 +364,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
                       onChange={(e) => {
                         form.setValue("telefone1", e.target.value);
                       }}
+                      autoComplete="false"
                     />
                     <FormMessage />
                   </FormItem>
