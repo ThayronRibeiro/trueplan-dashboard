@@ -5,16 +5,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AlignJustify } from "lucide-react";
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface TopMenuProps {
@@ -22,10 +15,13 @@ interface TopMenuProps {
 }
 
 export const TopMenu = ({ children }: TopMenuProps) => {
+  const [openPopover, setOpenPopover] = useState(false);
+  const [openSheet, setOpenSheet] = useState(false);
+
   return (
     <Fragment>
       <div className="fixed top-0 w-[100vw] h-12 bg-blue-600 flex items-center justify-end p-5 z-50 gap-3">
-        <Popover>
+        <Popover open={openPopover} onOpenChange={setOpenPopover}>
           <PopoverTrigger asChild>
             <Avatar className="w-8 h-8 cursor-pointer">
               <AvatarImage src="https://cdn-icons-png.flaticon.com/512/149/149071.png" />
@@ -33,23 +29,67 @@ export const TopMenu = ({ children }: TopMenuProps) => {
             </Avatar>
           </PopoverTrigger>
           <PopoverContent className="bg-slate-50 flex flex-col mr-5 w-[14em] space-y-2">
-            <Link to="/conta">Minha Conta</Link>
-            <Link to="/configuracoes">Configurações</Link>
+            <Link
+              to="/conta"
+              onClick={() => {
+                setOpenPopover(false);
+              }}
+            >
+              Minha Conta
+            </Link>
+            <Link
+              to="/configuracoes"
+              onClick={() => {
+                setOpenPopover(false);
+              }}
+            >
+              Configurações
+            </Link>
             <Separator />
             Sair
           </PopoverContent>
         </Popover>
-        <Sheet>
+        <Sheet open={openSheet} onOpenChange={setOpenSheet}>
           <SheetTrigger>
             <AlignJustify className="text-white mr-5" />
           </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetDescription className="flex flex-col text-black">
-                <Link to="/clientes">Clientes</Link>
-                <Link to="/categorias">Categorias</Link>
-              </SheetDescription>
-            </SheetHeader>
+          <SheetContent className="flex flex-col font-bold">
+            <Link
+              to="/"
+              onClick={() => {
+                setOpenSheet(false);
+              }}
+              className="hover:translate-x-2 transition-all ease-in-out"
+            >
+              Chamados
+            </Link>
+            <Link
+              to="/clientes"
+              onClick={() => {
+                setOpenSheet(false);
+              }}
+              className="hover:translate-x-2 transition-all ease-in-out"
+            >
+              Clientes
+            </Link>
+            <Link
+              to="/categorias"
+              onClick={() => {
+                setOpenSheet(false);
+              }}
+              className="hover:translate-x-2 transition-all ease-in-out"
+            >
+              Categorias
+            </Link>
+            <Link
+              to="/status"
+              onClick={() => {
+                setOpenSheet(false);
+              }}
+              className="hover:translate-x-2 transition-all ease-in-out"
+            >
+              Status
+            </Link>
           </SheetContent>
         </Sheet>
       </div>

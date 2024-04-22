@@ -9,9 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useChamadoService } from "@/app/services/chamados.service";
-import { Bounce, ToastContainer, toast } from "react-toastify";
+import { Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyTooltip } from "../Tooltip";
 import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
@@ -34,6 +33,19 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
   const chamadoService = useChamadoService();
 
   const queryClient = useQueryClient();
+
+  const notifyReagendadoSucces = () =>
+    toast.success("Reagendado com sucesso!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: 0,
+      theme: "colored",
+      transition: Bounce,
+    });
 
   //const [open, setOpen] = useState(false);
 
@@ -64,6 +76,28 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
           .catch(() => {
             notifyCancelError();
           });
+      }
+    },
+  });
+
+  const { mutateAsync: handleReagendar } = useMutation({
+    mutationFn: async (variables: Chamado) => {
+      const chamadoEncontrado = chamadoService.listarChamado(variables);
+
+      if (chamadoEncontrado) {
+        (await chamadoEncontrado).dataChamado = "23/04/2024";
+        localStorage.setItem("dataChamadoAtivo", "23-04-2024");
+        chamadoService.atualizarChamado(await chamadoEncontrado).then(() => {
+          notifyReagendadoSucces();
+          queryClient.fetchQuery({
+            queryKey: ["chamados"],
+            queryFn: () => {
+              return chamadoService.listarChamadosPorData(
+                localStorage.getItem("dataChamadoAtivo") ?? ""
+              );
+            },
+          });
+        });
       }
     },
   });
@@ -121,7 +155,6 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
 
   return (
     <>
-      <ToastContainer />
       <Table>
         <TableCaption>Todos os chamados desta data.</TableCaption>
         <TableHeader>
@@ -163,6 +196,7 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                       <>{chamado.descricaoProblema}</>
                     )}
                   </TableCell>
+                  <TableCell>{chamado.observacao}</TableCell>
                 </TableRow>
               </DialogTrigger>
               <DialogContent>
@@ -185,7 +219,12 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                             </div>
                           )}
                           <MyTooltip text="Reagendar chamado">
-                            <Clock className="bg-gray-400 p-1 rounded-sm cursor-pointer" />
+                            <Clock
+                              className="bg-gray-400 p-1 rounded-sm cursor-pointer"
+                              onClick={() => {
+                                handleReagendar(chamado);
+                              }}
+                            />
                           </MyTooltip>
                           <MyTooltip text="Transferir chamado">
                             <Repeat className="bg-orange-400 p-1 rounded-sm cursor-pointer" />

@@ -43,8 +43,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
 
-import { Bounce, ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Bounce, toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const FormSchema = z.object({
@@ -219,7 +218,6 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
 
   return (
     <>
-      <ToastContainer />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
