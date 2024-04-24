@@ -178,44 +178,6 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // function onSubmit(data: z.infer<typeof FormSchema>) {
-  //   const chamadoSave: Chamado = {
-  //     descricaoProblema: data.descricaoProblema,
-  //     cliente: {
-  //       id: data.cliente_id,
-  //     },
-  //     categoria: {
-  //       id: data.categoria_id,
-  //     },
-  //     telefone1: data.telefone1,
-  //     telefone2: data.telefone2,
-  //     usuario: {
-  //       id: "1",
-  //       nome: "",
-  //       email: "",
-  //       status: "",
-  //       dataCadastro: "",
-  //       ultimoAcesso: "",
-  //     },
-  //     prioridade: data.prioridade.valueOf(),
-  //     contato: data.contato,
-  //     status: {
-  //       id: "1",
-  //       descricao: "",
-  //       corBackground: "",
-  //       corLetras: "",
-  //     },
-  //     dataAbertura: "",
-  //     observacao: data.observacao,
-  //   };
-
-  //   chamadoService.salvarChamado(chamadoSave).then(() => {
-  //     localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
-  //     openOrClose();
-  //     notifySaveSucces();
-  //   });
-  // }
-
   return (
     <>
       <Form {...form}>

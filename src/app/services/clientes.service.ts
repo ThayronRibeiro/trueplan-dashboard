@@ -12,7 +12,16 @@ export const useClienteService = () => {
     return response.data;
   };
 
+  const salvarCliente = async (cliente: Cliente): Promise<Cliente> => {
+    const response: AxiosResponse<Cliente> = await httpClient.post<Cliente>(
+      `${resourceUrl}`,
+      cliente
+    );
+    return response.data;
+  };
+
   return {
     listarTodosOsClientes,
+    salvarCliente,
   };
 };
