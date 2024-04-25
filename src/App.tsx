@@ -5,6 +5,8 @@ import { TopMenu } from "./components/patterns/TopMenu";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Clientes } from "./pages/clientes";
+import { Categoria } from "./pages/categorias";
+import { Status } from "./pages/status";
 
 export function App() {
   return (
@@ -14,8 +16,9 @@ export function App() {
         <Fragment>
           <Routes>
             <Route path="/" element={<Chamados />} />
-            <Route path="/categorias" element={<Chamados />} />
             <Route path="/clientes" element={<Clientes />} />
+            <Route path="/categorias" element={<Categoria />} />
+            <Route path="/status" element={<Status />} />
           </Routes>
         </Fragment>
       </TopMenu>

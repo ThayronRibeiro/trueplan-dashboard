@@ -90,6 +90,15 @@ export const TopMenu = ({ children }: TopMenuProps) => {
             >
               Status
             </Link>
+            <Link
+              to="/tecnicos"
+              onClick={() => {
+                setOpenSheet(false);
+              }}
+              className="hover:translate-x-2 transition-all ease-in-out"
+            >
+              Técnicos
+            </Link>
           </SheetContent>
         </Sheet>
       </div>

@@ -12,7 +12,16 @@ export const useCategoriaService = () => {
     return response.data;
   };
 
+  const salvarCategoria = async (data: Categoria): Promise<Categoria> => {
+    const response: AxiosResponse<Categoria> = await httpClient.post(
+      `${resourceUrl}`,
+      data
+    );
+    return response.data;
+  };
+
   return {
     listarTodasAsCategorias,
+    salvarCategoria,
   };
 };

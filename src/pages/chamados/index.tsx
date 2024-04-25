@@ -44,7 +44,6 @@ export const Chamados = () => {
   const handleChangeTab = (data: string) => {
     chamadoService.listarChamadosPorData(data).then((value) => {
       console.log("Dados retornados de listarChamadosPorData:", value);
-      //setChamados(value ?? []);
     });
   };
 

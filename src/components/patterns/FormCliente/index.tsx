@@ -48,11 +48,6 @@ export const FormSchema = z.object({
   ),
 });
 
-// const onSubmit = (data: z.infer<typeof FormSchema>) => {
-//   data.cnpj = removerPontuacao(data.cnpj);
-//   return console.log(data);
-// };
-
 export const FormCliente = ({ children, openOrClose }: FormClienteProps) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -93,6 +88,8 @@ export const FormCliente = ({ children, openOrClose }: FormClienteProps) => {
   const { mutate: onSubmit, isLoading }: any = useMutation({
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
       data.cnpj = removerPontuacao(data.cnpj);
+      data.telefone1 = removerPontuacao(data.telefone1);
+      data.telefone2 = removerPontuacao(data.telefone2 ?? "");
       console.log(data);
       return clienteService.salvarCliente(data);
     },
@@ -272,16 +269,6 @@ export const FormCliente = ({ children, openOrClose }: FormClienteProps) => {
               />
             </div>
           </div>
-
-          {/* <div className="col-span-2"></div>
-
-          <div className="col-span-1"></div>
-
-          <div className="col-span-1"></div>
-
-          <div className="grid grid-cols-6 gap-3">
-            <div className="flex-col space-y-2 col-span-4"></div>
-          </div> */}
 
           <Button
             type="submit"

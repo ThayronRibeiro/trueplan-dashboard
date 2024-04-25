@@ -128,31 +128,6 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
       transition: Bounce,
     });
 
-  // const handleFinally = (chamado: Chamado) => {
-  //   //Configurar um endpoint no Spring para receber o novo status e persstir no banco de dados
-  //   chamado.status.id = "2";
-  // };
-
-  // const handleCancel = async (chamado: Chamado) => {
-  //   const chamadoEncontrado = await chamadoService.listarChamado(chamado);
-
-  //   console.log(chamadoEncontrado);
-
-  //   if (chamadoEncontrado) {
-  //     chamadoEncontrado.status.id = "3";
-  //     chamadoService
-  //       .atualizarChamado(chamadoEncontrado)
-  //       .then((value) => {
-  //         notifyCancelSucces();
-  //         navigate("/");
-  //         console.log(value);
-  //       })
-  //       .catch(() => {
-  //         notifyCancelError();
-  //       });
-  //   }
-  // };
-
   return (
     <>
       <Table>
@@ -178,8 +153,8 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
                   <TableCell
                     className="font-medium hover:opacity-90 items-center justify-center flex h-[55px]"
                     style={{
-                      backgroundColor: `#${chamado.status.corBackground}`,
-                      color: `#${chamado.status.corLetras}`,
+                      backgroundColor: `${chamado.status.corBackground}`,
+                      color: `${chamado.status.corLetras}`,
                     }}
                   >
                     {chamado.status.descricao}
