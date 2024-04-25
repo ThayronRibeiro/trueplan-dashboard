@@ -56,7 +56,7 @@ export const Clientes = () => {
               Preencha os campos para adicionar um novo cliente
             </DialogDescription>
           </DialogHeader>
-          <FormCliente />
+          <FormCliente openOrClose={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
       <Table>
@@ -69,7 +69,7 @@ export const Clientes = () => {
             <TableHead>Telefone 2</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="transition-all duration-300">
           {clientes?.map((cliente) => (
             <>
               <TableRow>

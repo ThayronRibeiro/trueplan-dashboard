@@ -1,44 +1,51 @@
 import { formatarCPFCNPJ } from "@/app/functions/FormatarCpfCnpj";
 import { formatarTelefone } from "@/app/functions/FormatarTelefone";
 import { removerPontuacao } from "@/app/functions/RemoverPontuacao";
-import { ClienteCnpjResponse } from "@/app/models/clienteCnpjResponse";
 import { useClienteCnpjResponse } from "@/app/services/clienteCnpjResponse.service";
 import { useClienteService } from "@/app/services/clientes.service";
 import { Button } from "@/components/ui/button";
-import { DialogClose } from "@/components/ui/dialog";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { Save } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoaderCircle, Save } from "lucide-react";
+import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { Bounce, toast } from "react-toastify";
 import { z } from "zod";
 
 interface FormClienteProps {
+  openOrClose: () => void;
   children?: ReactNode;
 }
+
+const emptyStringToUndefined = z.literal("").transform(() => undefined);
 
 export const FormSchema = z.object({
   cnpj: z
     .string({
-      required_error: "Por favor digite o CNPJ do cliente.",
+      required_error: "Por favor, digite o CNPJ do cliente.",
     })
     .max(18),
 
   nomeFantasia: z.string({
-    required_error: "Por favor digite o nome fantasia do cliente.",
+    required_error: "Por favor, digite o nome fantasia do cliente.",
   }),
   razaoSocial: z.string({
-    required_error: "Por favor digite a razão social do cliente.",
+    required_error: "Por favor, digite a razão social do cliente.",
   }),
   telefone1: z.string({
-    required_error: "Por favor digite um telefone do cliente",
+    required_error: "Por favor, digite o telefone do cliente",
   }),
-  telefone2: z.string({
-    required_error: "Por favor digite um telefone do cliente",
-  }),
+  telefone2: z.optional(z.string()),
+  email: z.optional(
+    z
+      .string()
+      .email({
+        message: "Por favor, digite um email válido!",
+      })
+      .or(emptyStringToUndefined)
+  ),
 });
 
 // const onSubmit = (data: z.infer<typeof FormSchema>) => {
@@ -46,7 +53,7 @@ export const FormSchema = z.object({
 //   return console.log(data);
 // };
 
-export const FormCliente = ({ children }: FormClienteProps) => {
+export const FormCliente = ({ children, openOrClose }: FormClienteProps) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -67,30 +74,58 @@ export const FormCliente = ({ children }: FormClienteProps) => {
       transition: Bounce,
     });
 
-  const { mutate: onSubmit }: any = useMutation({
+  const notifyError = () =>
+    toast.error("Erro ao cadastrar cliente!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: 0,
+      theme: "colored",
+      transition: Bounce,
+    });
+
+  const queryClient = useQueryClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { mutate: onSubmit, isLoading }: any = useMutation({
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
       data.cnpj = removerPontuacao(data.cnpj);
       console.log(data);
-      notifySaveSucces();
       return clienteService.salvarCliente(data);
+    },
+    onSuccess: () => {
+      queryClient.fetchQuery({
+        queryKey: ["clientes"],
+        queryFn: async () => {
+          return clienteService.listarTodosOsClientes();
+        },
+      });
+      notifySaveSucces();
+      openOrClose();
+    },
+    onError: () => {
+      notifyError();
     },
   });
 
-  //const [preenchimentoRealizado, setPreenchimentoRealizado] = useState(false);
+  const handleInputChange = async (cnpj: string) => {
+    const data = await clienteCnpjResponseService.getCnpj(
+      removerPontuacao(cnpj)
+    );
 
-  const [dadosClientes, setDadosClientes] = useState<ClienteCnpjResponse>();
-
-  const handleInputChange = (cnpj: string) => {
-    clienteCnpjResponseService.getCnpj(removerPontuacao(cnpj)).then((data) => {
-      setDadosClientes(data);
-    });
     //Preenchimento dos Dados
-    dadosClientes?.nome_fantasia == ""
-      ? form.setValue("nomeFantasia", dadosClientes?.razao_social ?? "")
-      : form.setValue("nomeFantasia", dadosClientes?.nome_fantasia ?? "");
-    form.setValue("razaoSocial", dadosClientes?.razao_social ?? "");
-    form.setValue("telefone1", dadosClientes?.ddd_telefone_1 ?? "");
-    form.setValue("telefone2", dadosClientes?.ddd_telefone_2 ?? "");
+    if (data) {
+      data.nome_fantasia == ""
+        ? form.setValue("nomeFantasia", data.razao_social ?? "")
+        : form.setValue("nomeFantasia", data.nome_fantasia ?? "");
+      form.setValue("razaoSocial", data.razao_social ?? "");
+      form.setValue("telefone1", data.ddd_telefone_1 ?? "");
+      form.setValue("telefone2", data.ddd_telefone_2 ?? "");
+      form.setValue("email", data.email ?? "");
+    }
   };
 
   return (
@@ -111,9 +146,7 @@ export const FormCliente = ({ children }: FormClienteProps) => {
                       onChange={(e) => {
                         form.setValue("cnpj", formatarCPFCNPJ(e.target.value));
                       }}
-                      onBlur={() => {
-                        handleInputChange(form.getValues("cnpj"));
-                      }}
+                      onBlur={() => handleInputChange(form.getValues("cnpj"))}
                       autoComplete="false"
                       maxLength={18}
                     />
@@ -178,7 +211,7 @@ export const FormCliente = ({ children }: FormClienteProps) => {
                   <>
                     <FormLabel htmlFor="telefone1">Telefone </FormLabel>
                     <Input
-                      placeholder="Digite a razão social do cliente"
+                      placeholder="Digite o primeiro telefone do cliente"
                       {...field}
                       onChange={(e) => {
                         form.setValue(
@@ -202,7 +235,7 @@ export const FormCliente = ({ children }: FormClienteProps) => {
                   <>
                     <FormLabel htmlFor="telefone2">Telefone 2</FormLabel>
                     <Input
-                      placeholder="Digite a razão social do cliente"
+                      placeholder="Digite o segundo telefone do cliente"
                       {...field}
                       onChange={(e) => {
                         form.setValue(
@@ -211,6 +244,27 @@ export const FormCliente = ({ children }: FormClienteProps) => {
                         );
                       }}
                       value={form.getValues("telefone2")}
+                    />
+                    <FormMessage />
+                  </>
+                )}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <>
+                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <Input
+                      placeholder="Digite o email do cliente"
+                      {...field}
+                      onChange={(e) => {
+                        form.setValue("email", e.target.value);
+                      }}
+                      value={form.getValues("email")}
                     />
                     <FormMessage />
                   </>
@@ -229,15 +283,23 @@ export const FormCliente = ({ children }: FormClienteProps) => {
             <div className="flex-col space-y-2 col-span-4"></div>
           </div> */}
 
-          <DialogClose>
-            <Button
-              type="submit"
-              className="flex items-center bg-emerald-500 hover:bg-emerald-600"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Salvar
-            </Button>
-          </DialogClose>
+          <Button
+            type="submit"
+            className="flex items-center bg-emerald-500 hover:bg-emerald-600"
+          >
+            {isLoading ? (
+              <>
+                <LoaderCircle className="animate-spin w-4 h-4 mr-2" />
+                Salvando ...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Salvar
+              </>
+            )}
+          </Button>
+
           {children}
         </form>
       </Form>
