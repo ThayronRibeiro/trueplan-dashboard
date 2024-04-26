@@ -10,20 +10,8 @@ import {
 } from "@/components/ui/table";
 import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { MyTooltip } from "../Tooltip";
-import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { DialogEditChamado } from "../DialogEditChamado";
 
 interface ChamadoTableProps {
   dataChamado: string;
@@ -56,7 +44,11 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
     },
   });
 
-  const { mutateAsync: handleCancel } = useMutation({
+  const {
+    mutateAsync: handleCancel,
+    isSuccess,
+    isPending,
+  } = useMutation({
     mutationFn: async (variables: Chamado) => {
       const chamadoEncontrado = chamadoService.listarChamado(variables);
 
@@ -147,89 +139,37 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
         <TableBody>
           {isLoading && <p> Carregando... </p>}
           {chamados?.map((chamado) => (
-            <Dialog>
-              <DialogTrigger asChild>
-                <TableRow key={chamado.id}>
-                  <TableCell
-                    className="font-medium hover:opacity-90 items-center justify-center flex h-[55px]"
-                    style={{
-                      backgroundColor: `${chamado.status.corBackground}`,
-                      color: `${chamado.status.corLetras}`,
-                    }}
-                  >
-                    {chamado.status.descricao}
-                  </TableCell>
-                  <TableCell>{chamado.prioridade}</TableCell>
-                  <TableCell>{chamado.usuario.nome}</TableCell>
-                  <TableCell>{chamado.cliente.nomeFantasia}</TableCell>
-                  <TableCell>{chamado.contato}</TableCell>
-                  <TableCell>{chamado.telefone1}</TableCell>
-                  <TableCell className="whitespace-normal break-all">
-                    {chamado.descricaoProblema.length >= 45 ? (
-                      <>{chamado.descricaoProblema.substring(0, 62)}...</>
-                    ) : (
-                      <>{chamado.descricaoProblema}</>
-                    )}
-                  </TableCell>
-                  <TableCell>{chamado.observacao}</TableCell>
-                </TableRow>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Chamado #{chamado.id}</DialogTitle>
-                  <DialogDescription>
-                    {chamado.cliente.nomeFantasia}
-                  </DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="h-full w-full rounded-md border p-4">
-                  <div className="flex w-full justify-between">
-                    <div className="flex w-full items-center gap-3">
-                      {chamado.status.id && (
-                        <>
-                          {!chamado.tecnico && chamado.status.id != "3" && (
-                            <div className="flex w-100 h-8 p-2 cursor-pointer items-center justify-center gap-2 bg-slate-800 hover:opacity-85 rounded-md text-white">
-                              <>
-                                <Hand className="w-4 h-4" /> Pegar chamado
-                              </>
-                            </div>
-                          )}
-                          <MyTooltip text="Reagendar chamado">
-                            <Clock
-                              className="bg-gray-400 p-1 rounded-sm cursor-pointer"
-                              onClick={() => {
-                                handleReagendar(chamado);
-                              }}
-                            />
-                          </MyTooltip>
-                          <MyTooltip text="Transferir chamado">
-                            <Repeat className="bg-orange-400 p-1 rounded-sm cursor-pointer" />
-                          </MyTooltip>
-                          <MyTooltip text="Cancelar chamado">
-                            <DialogClose asChild>
-                              <X
-                                className="bg-red-500 p-1 rounded-sm cursor-pointer"
-                                onClick={() => {
-                                  handleCancel(chamado);
-                                  //setOpen(false);
-                                }}
-                              />
-                            </DialogClose>
-                          </MyTooltip>
-                          <MyTooltip text="Finalizar chamado">
-                            <SquareCheckBig
-                              className="bg-green-400 p-1 rounded-sm cursor-pointer"
-                              //   onClick={() => {
-                              //     handleFinally(chamado);
-                              //   }}
-                            />
-                          </MyTooltip>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
+            <DialogEditChamado
+              chamado={chamado}
+              handleCancel={() => handleCancel(chamado)}
+              handleReagendar={() => handleReagendar(chamado)}
+              cancelFunction={{ isSuccess: isSuccess, isPending: isPending }}
+            >
+              <TableRow key={chamado.id}>
+                <TableCell
+                  className="font-medium hover:opacity-90 items-center justify-center flex h-[55px]"
+                  style={{
+                    backgroundColor: `${chamado.status.corBackground}`,
+                    color: `${chamado.status.corLetras}`,
+                  }}
+                >
+                  {chamado.status.descricao}
+                </TableCell>
+                <TableCell>{chamado.prioridade}</TableCell>
+                <TableCell>{chamado.usuario.nome}</TableCell>
+                <TableCell>{chamado.cliente.nomeFantasia}</TableCell>
+                <TableCell>{chamado.contato}</TableCell>
+                <TableCell>{chamado.telefone1}</TableCell>
+                <TableCell className="whitespace-normal break-all">
+                  {chamado.descricaoProblema.length >= 45 ? (
+                    <>{chamado.descricaoProblema.substring(0, 62)}...</>
+                  ) : (
+                    <>{chamado.descricaoProblema}</>
+                  )}
+                </TableCell>
+                <TableCell>{chamado.observacao}</TableCell>
+              </TableRow>
+            </DialogEditChamado>
           ))}
         </TableBody>
       </Table>

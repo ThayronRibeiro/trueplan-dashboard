@@ -1,5 +1,6 @@
 import { useStatusChamadoService } from "@/app/services/status.service";
 import { Button } from "@/components/ui/button";
+import { DialogClose } from "@/components/ui/dialog";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,7 +77,7 @@ export const FormStatus = ({
     },
     onSuccess: () => {
       queryClient.fetchQuery({
-        queryKey: ["clientes"],
+        queryKey: ["status"],
         queryFn: async () => {
           return statusChamadoService.listarTodosStatus();
         },
@@ -176,8 +177,6 @@ export const FormStatus = ({
               </>
             )}
           </Button>
-
-          {children}
         </form>
       </Form>
     </>
