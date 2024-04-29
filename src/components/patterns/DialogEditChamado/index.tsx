@@ -35,18 +35,6 @@ export const DialogEditChamado = ({
   const [open, setOpen] = useState(false);
   const [openReagendamento, setOpenReagendamento] = useState(false);
 
-  const DialogReagendar = () => {
-    console.log("Teste");
-
-    <>
-      <Dialog>
-        <DialogContent>
-          <DialogTitle>Reagendar</DialogTitle>
-        </DialogContent>
-      </Dialog>
-    </>;
-  };
-
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
