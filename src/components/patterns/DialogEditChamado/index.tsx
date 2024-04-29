@@ -12,6 +12,7 @@ import { Clock, Hand, Repeat, SquareCheckBig, X } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { MyTooltip } from "../Tooltip";
 import { Loading } from "../Loading";
+import { FormReagendamento } from "../FormReagendamento";
 
 interface DialogEditChamadoProps {
   children: ReactNode;
@@ -32,6 +33,19 @@ export const DialogEditChamado = ({
   cancelFunction,
 }: DialogEditChamadoProps) => {
   const [open, setOpen] = useState(false);
+  const [openReagendamento, setOpenReagendamento] = useState(false);
+
+  const DialogReagendar = () => {
+    console.log("Teste");
+
+    <>
+      <Dialog>
+        <DialogContent>
+          <DialogTitle>Reagendar</DialogTitle>
+        </DialogContent>
+      </Dialog>
+    </>;
+  };
 
   return (
     <>
@@ -56,14 +70,33 @@ export const DialogEditChamado = ({
                         </>
                       </div>
                     )}
-                    <MyTooltip text="Reagendar chamado">
-                      <Clock
-                        className="bg-gray-400 p-1 rounded-sm cursor-pointer"
-                        onClick={() => {
-                          handleReagendar();
-                        }}
-                      />
-                    </MyTooltip>
+
+                    <Dialog
+                      open={openReagendamento}
+                      onOpenChange={setOpenReagendamento}
+                    >
+                      <DialogTrigger asChild>
+                        <div>
+                          <MyTooltip text="Reagendar chamado">
+                            <Clock className="bg-gray-400 p-1 rounded-sm cursor-pointer" />
+                          </MyTooltip>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogTitle>Reagendamento de chamado</DialogTitle>
+                        <DialogDescription>
+                          Selecione a data para o reagendamento do chamado
+                        </DialogDescription>
+                        <FormReagendamento
+                          openOrClose={() => {
+                            setOpenReagendamento(false);
+                            setOpen(false);
+                          }}
+                          chamado={chamado}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
                     <MyTooltip text="Transferir chamado">
                       <Repeat className="bg-orange-400 p-1 rounded-sm cursor-pointer" />
                     </MyTooltip>
@@ -72,10 +105,10 @@ export const DialogEditChamado = ({
                         className="bg-red-500 p-1 rounded-sm cursor-pointer"
                         onClick={async () => {
                           await handleCancel();
-                          if (await cancelFunction.isPending) {
+                          if (cancelFunction.isPending) {
                             <Loading />;
                           }
-                          if (await cancelFunction.isSuccess) {
+                          if (cancelFunction.isSuccess) {
                             setOpen(false);
                           }
                         }}

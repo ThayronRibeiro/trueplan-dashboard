@@ -77,8 +77,11 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
       const chamadoEncontrado = chamadoService.listarChamado(variables);
 
       if (chamadoEncontrado) {
-        (await chamadoEncontrado).dataChamado = "23/04/2024";
-        localStorage.setItem("dataChamadoAtivo", "23-04-2024");
+        (await chamadoEncontrado).dataChamado = variables.dataChamado;
+        localStorage.setItem(
+          "dataChamadoAtivo",
+          variables.dataChamado.replace("/", "-").replace("/", "-")
+        );
         chamadoService.atualizarChamado(await chamadoEncontrado).then(() => {
           notifyReagendadoSucces();
           queryClient.fetchQuery({

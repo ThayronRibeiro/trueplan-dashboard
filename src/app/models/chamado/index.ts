@@ -8,7 +8,7 @@ export interface Chamado {
   status: StatusChamado;
   dataAbertura: string;
   dataFinalizacao?: string;
-  dataChamado?: string;
+  dataChamado: string;
   prioridade?: string;
   cliente: Cliente;
   contato: string;
