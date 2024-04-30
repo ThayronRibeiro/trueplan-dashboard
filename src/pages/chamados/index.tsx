@@ -16,7 +16,7 @@ import { PlusCircle, Save } from "lucide-react";
 // import { Chamado } from "@/app/models/chamado";
 import { ChamadoTable } from "@/components/patterns/ChamadoTable";
 import { FormChamado } from "@/components/patterns/FormChamado";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 
@@ -93,21 +93,27 @@ export const Chamados = () => {
       </Dialog>
 
       <Tabs orientation="horizontal" defaultValue={dataChamadoAtivo}>
-        <TabsList>
-          <>
-            {datasChamados?.map((_datas) => (
-              <>
-                <TabsTrigger
-                  key={_datas}
-                  className="transition-all duration-300"
-                  value={_datas}
-                  onClick={() => handleChangeTab(_datas)}
-                >
-                  {_datas.replace("-", "/").replace("-", "/")}
-                </TabsTrigger>
-              </>
-            ))}
-          </>
+        <TabsList className="absolute">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <>
+              {datasChamados?.map((_datas) => (
+                <>
+                  <TabsTrigger
+                    key={_datas}
+                    className="transition-all duration-300"
+                    value={_datas}
+                    onClick={() => handleChangeTab(_datas)}
+                  >
+                    {_datas.replace("-", "/").replace("-", "/")}
+                  </TabsTrigger>
+                </>
+              ))}
+            </>
+            <ScrollBar
+              orientation="horizontal"
+              className="h-2 opacity-35 relative bottom-0"
+            />
+          </ScrollArea>
         </TabsList>
 
         {datasChamados?.map((_datas) => (
