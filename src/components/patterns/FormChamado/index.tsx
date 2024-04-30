@@ -45,6 +45,7 @@ import { useChamadoService } from "@/app/services/chamados.service";
 
 import { Bounce, toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatDate } from "@/app/functions/FormatarData";
 
 export const FormSchema = z.object({
   cliente_id: z.string({
@@ -108,6 +109,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
         },
         dataAbertura: "",
         observacao: data.observacao,
+        dataChamado: "",
       };
 
       chamadoService.salvarChamado(chamadoSave).then(() => {
@@ -143,13 +145,6 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
   const chamadoService = useChamadoService();
-
-  const formatDate = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
 
   const notifySaveSucces = () =>
     toast.success("Cadastrado com sucesso!", {

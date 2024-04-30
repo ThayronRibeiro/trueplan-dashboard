@@ -1,4 +1,6 @@
 import { converterData } from "@/app/functions/ConverterData";
+import { formatarDataController } from "@/app/functions/FormatarDataController";
+import { formatarDataISO } from "@/app/functions/FormatarDataISO";
 import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
 import { Button } from "@/components/ui/button";
@@ -6,7 +8,7 @@ import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CalendarCheck, LoaderCircle, Save } from "lucide-react";
+import { CalendarCheck, LoaderCircle } from "lucide-react";
 import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { Bounce, toast } from "react-toastify";
@@ -65,19 +67,39 @@ export const FormReagendamento = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { mutate: onSubmit, isLoading }: any = useMutation({
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
-      console.log(data);
       chamado.dataChamado = converterData(data.dataChamado);
       return chamadoService.atualizarChamado(chamado);
     },
     onSuccess: () => {
+      //   queryClient.fetchQuery({
+      //     queryKey: ["chamados"],
+      //     queryFn: async () => {
+      //       return chamadoService.listarChamadosPorData(chamado.dataChamado);
+      //     },
+      //   });
+
+      localStorage.setItem(
+        "dataChamadoAtivo",
+        formatarDataISO(chamado.dataChamado)
+      );
+      queryClient.prefetchQuery({
+        queryKey: ["datasChamados"],
+        queryFn: async () => {
+          return chamadoService.listarDatas();
+        },
+      });
       queryClient.fetchQuery({
         queryKey: ["chamados"],
         queryFn: async () => {
-          return chamadoService.listarChamadosPorData(chamado.dataChamado);
+          chamadoService.listarChamadosPorData(
+            formatarDataController(
+              localStorage.getItem("dataChamadoAtivo") ?? ""
+            )
+          );
         },
       });
-      notifySaveSucces();
       openOrClose();
+      notifySaveSucces();
     },
     onError: (err) => {
       notifyError(err.message);

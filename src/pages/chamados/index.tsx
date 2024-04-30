@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChamadoService } from "@/app/services/chamados.service";
@@ -18,6 +18,7 @@ import { ChamadoTable } from "@/components/patterns/ChamadoTable";
 import { FormChamado } from "@/components/patterns/FormChamado";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { formatDate } from "@/app/functions/FormatarData";
 
 export const Chamados = () => {
   const [open, setOpen] = useState(false);
@@ -41,11 +42,15 @@ export const Chamados = () => {
     },
   });
 
+  let dataChamadoAtivo = formatDate(new Date());
+
   const handleChangeTab = (data: string) => {
     chamadoService.listarChamadosPorData(data).then((value) => {
       console.log("Dados retornados de listarChamadosPorData:", value);
     });
   };
+
+  useEffect(() => {}, [dataChamadoAtivo]);
 
   return (
     <div className="p-4 space-y-4">
@@ -87,7 +92,7 @@ export const Chamados = () => {
         </DialogContent>
       </Dialog>
 
-      <Tabs orientation="horizontal">
+      <Tabs orientation="horizontal" defaultValue={dataChamadoAtivo}>
         <TabsList>
           <>
             {datasChamados?.map((_datas) => (
