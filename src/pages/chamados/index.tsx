@@ -18,7 +18,7 @@ import { ChamadoTable } from "@/components/patterns/ChamadoTable";
 import { FormChamado } from "@/components/patterns/FormChamado";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { formatDate } from "@/app/functions/FormatarData";
+//import { formatDate } from "@/app/functions/FormatarData";
 
 export const Chamados = () => {
   const [open, setOpen] = useState(false);
@@ -41,16 +41,6 @@ export const Chamados = () => {
       });
     },
   });
-
-  let dataChamadoAtivo = formatDate(new Date());
-
-  const handleChangeTab = (data: string) => {
-    chamadoService.listarChamadosPorData(data).then((value) => {
-      console.log("Dados retornados de listarChamadosPorData:", value);
-    });
-  };
-
-  useEffect(() => {}, [dataChamadoAtivo]);
 
   return (
     <div className="p-4 space-y-4">
@@ -92,9 +82,9 @@ export const Chamados = () => {
         </DialogContent>
       </Dialog>
 
-      <Tabs orientation="horizontal" defaultValue={dataChamadoAtivo}>
-        <TabsList className="absolute">
-          <ScrollArea className="w-full whitespace-nowrap">
+      <Tabs orientation="horizontal">
+        <TabsList>
+          <ScrollArea className="w-full h-[35px] whitespace-nowrap fixed bottom-0">
             <>
               {datasChamados?.map((_datas) => (
                 <>
@@ -102,7 +92,7 @@ export const Chamados = () => {
                     key={_datas}
                     className="transition-all duration-300"
                     value={_datas}
-                    onClick={() => handleChangeTab(_datas)}
+                    //onClick={() => handleChangeTab(_datas)}
                   >
                     {_datas.replace("-", "/").replace("-", "/")}
                   </TabsTrigger>

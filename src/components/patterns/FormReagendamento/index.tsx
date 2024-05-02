@@ -8,6 +8,7 @@ import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { error } from "console";
 import { CalendarCheck, LoaderCircle } from "lucide-react";
 import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
@@ -71,27 +72,22 @@ export const FormReagendamento = ({
       return chamadoService.atualizarChamado(chamado);
     },
     onSuccess: () => {
-      //   queryClient.fetchQuery({
-      //     queryKey: ["chamados"],
-      //     queryFn: async () => {
-      //       return chamadoService.listarChamadosPorData(chamado.dataChamado);
-      //     },
-      //   });
-
       localStorage.setItem(
         "dataChamadoAtivo",
         formatarDataISO(chamado.dataChamado)
       );
+
       queryClient.prefetchQuery({
         queryKey: ["datasChamados"],
         queryFn: async () => {
           return chamadoService.listarDatas();
         },
       });
-      queryClient.fetchQuery({
+
+      queryClient.prefetchQuery({
         queryKey: ["chamados"],
         queryFn: async () => {
-          chamadoService.listarChamadosPorData(
+          return chamadoService.listarChamadosPorData(
             formatarDataController(
               localStorage.getItem("dataChamadoAtivo") ?? ""
             )
