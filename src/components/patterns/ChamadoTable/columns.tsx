@@ -1,0 +1,75 @@
+import { Chamado } from "@/app/models/chamado";
+import { ColumnDef } from "@tanstack/react-table";
+
+export const columns: ColumnDef<Chamado>[] = [
+  {
+    accessorKey: "status.descricao",
+    header: () => <div className="w-[80px]">Status</div>,
+    cell: ({ row }) => {
+      return (
+        <div
+          className="font-medium hover:opacity-90 items-center justify-center flex h-[55px]"
+          style={{
+            backgroundColor: `${row.original.status.corBackground}`,
+            color: `${row.original.status.corLetras}`,
+          }}
+        >
+          {row.original.status.descricao}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "prioridade",
+    header: () => (
+      <div className="w-[80px] items-center justify-center flex">
+        Prioridade
+      </div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="justify-center flex">{row.original.prioridade}</div>
+      );
+    },
+  },
+  {
+    accessorKey: "usuario.nome",
+    header: () => (
+      <div className="w-[80px] items-center justify-center flex">Atendente</div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="justify-center flex">{row.original.usuario.nome}</div>
+      );
+    },
+  },
+  {
+    id: "cliente",
+    accessorKey: "cliente.nomeFantasia",
+    header: () => <div className="w-[220px]">Cliente</div>,
+  },
+  {
+    accessorKey: "contato",
+    header: () => <div className="w-[120px]">Contato</div>,
+  },
+  {
+    accessorKey: "telefone1",
+    header: () => <div className="w-[125px]">Telefone</div>,
+  },
+  {
+    accessorKey: "descricaoProblema",
+    header: () => <div className="w-[300px]">Descrição do problema</div>,
+  },
+  {
+    accessorKey: "observacao",
+    header: "Observação",
+  },
+  //Normalizador de pesquisa
+  {
+    id: "normalizador",
+    header: () => <div className="hidden"></div>,
+    cell: () => <div className="hidden"></div>,
+    accessorFn: (row) =>
+      `${row.cliente.nomeFantasia} ${row.descricaoProblema} ${row.contato}`,
+  },
+];

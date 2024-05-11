@@ -2,13 +2,14 @@ import { converterData } from "@/app/functions/ConverterData";
 import { formatarDataController } from "@/app/functions/FormatarDataController";
 import { formatarDataISO } from "@/app/functions/FormatarDataISO";
 import { Chamado } from "@/app/models/chamado";
+import { TypeError } from "@/app/models/utils/Error";
 import { useChamadoService } from "@/app/services/chamados.service";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { error } from "console";
+import { AxiosError } from "axios";
 import { CalendarCheck, LoaderCircle } from "lucide-react";
 import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
@@ -84,7 +85,7 @@ export const FormReagendamento = ({
         },
       });
 
-      queryClient.prefetchQuery({
+      queryClient.fetchQuery({
         queryKey: ["chamados"],
         queryFn: async () => {
           return chamadoService.listarChamadosPorData(
@@ -97,8 +98,8 @@ export const FormReagendamento = ({
       openOrClose();
       notifySaveSucces();
     },
-    onError: (err) => {
-      notifyError(err.message);
+    onError: (err: AxiosError) => {
+      notifyError(err.toJSON.toString());
     },
   });
 

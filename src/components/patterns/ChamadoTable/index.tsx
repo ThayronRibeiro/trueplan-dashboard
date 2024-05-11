@@ -12,6 +12,8 @@ import { useChamadoService } from "@/app/services/chamados.service";
 import { Bounce, toast } from "react-toastify";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DialogEditChamado } from "../DialogEditChamado";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
 interface ChamadoTableProps {
   dataChamado: string;
@@ -125,7 +127,7 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
 
   return (
     <>
-      <Table>
+      {/* <Table>
         <TableCaption>Todos os chamados desta data.</TableCaption>
         <TableHeader>
           <TableRow>
@@ -175,7 +177,8 @@ export const ChamadoTable = ({ dataChamado }: ChamadoTableProps) => {
             </DialogEditChamado>
           ))}
         </TableBody>
-      </Table>
+      </Table> */}
+      <DataTable columns={columns} data={chamados ?? []} />
     </>
   );
 };
