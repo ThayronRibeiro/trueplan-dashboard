@@ -1,6 +1,7 @@
 import {
   ColumnDef,
   ColumnFiltersState,
+  Row,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -28,8 +29,30 @@ import { Input } from "@/components/ui/input";
 import { DialogEditChamado } from "../DialogEditChamado";
 import { Chamado } from "@/app/models/chamado";
 import { Bounce, toast } from "react-toastify";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChamadoService } from "@/app/services/chamados.service";
+import { Button } from "@/components/ui/button";
+import { CalendarCheck, Clock } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { converterData } from "@/app/functions/ConverterData";
+import { formatarDataController } from "@/app/functions/FormatarDataController";
+
+export const FormSchema = z.object({
+  dataChamado: z.string({
+    required_error: "Por favor, selecione uma nova data.",
+  }),
+});
 
 export function DataTable<TData extends Chamado, TValue>({
   columns,
@@ -37,6 +60,7 @@ export function DataTable<TData extends Chamado, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
     data,
@@ -46,10 +70,16 @@ export function DataTable<TData extends Chamado, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
+      rowSelection,
     },
+  });
+
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
   });
 
   const chamadoService = useChamadoService();
@@ -152,9 +182,55 @@ export function DataTable<TData extends Chamado, TValue>({
       transition: Bounce,
     });
 
+  // const handleReagendar = (
+  //   chamados: Row<TData>[],
+  //   data: z.infer<typeof FormSchema>
+  // ) => {
+  //   chamados.map((chamado) => {
+  //     chamado.original.dataChamado = converterData(data.dataChamado);
+  //     return chamadoService.atualizarChamado(chamado.original);
+  //   });
+  // };
+
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setReagendamento(data.dataChamado);
+    localStorage.setItem("dataChamadoAtivo", data.dataChamado);
+    handleReagendarChamados(table.getFilteredSelectedRowModel().rows, data);
+  };
+
+  const [dataReagendamento, setReagendamento] = useState("");
+
+  const { mutate: handleReagendarChamados }: any = useMutation({
+    mutationFn: (chamados: Row<TData>[]): any => {
+      chamados.map((chamado) => {
+        chamado.original.dataChamado = converterData(dataReagendamento);
+        chamadoService.atualizarChamado(chamado.original);
+      });
+    },
+    onSuccess: () => {
+      queryClient.prefetchQuery({
+        queryKey: ["datasChamados"],
+        queryFn: async () => {
+          return chamadoService.listarDatas();
+        },
+      });
+
+      queryClient.fetchQuery({
+        queryKey: ["chamados"],
+        queryFn: async () => {
+          return chamadoService.listarChamadosPorData(
+            formatarDataController(
+              localStorage.getItem("dataChamadoAtivo") ?? ""
+            )
+          );
+        },
+      });
+    },
+  });
+
   return (
     <>
-      <div className="flex items-center py-4 ml-5 mr-5">
+      <div className="flex items-center py-4 ml-5 mr-5 gap-3">
         <Input
           placeholder="Procurar chamados..."
           value={
@@ -163,8 +239,69 @@ export function DataTable<TData extends Chamado, TValue>({
           onChange={(event) =>
             table.getColumn("normalizador")?.setFilterValue(event.target.value)
           }
-          className="w-full"
+          className="w-3/4"
         />
+        <div>
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-500 hover:bg-blue-400 flex align-middle gap-2">
+                  <Clock className="w-4 h-4" />
+                  Reagendar Selecionados
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Reagendar chamados</DialogTitle>
+                  <DialogDescription>
+                    Selecione a data do reagendamento
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
+                    <div className="grid grid-cols-6 gap-3">
+                      <div className="col-span-2">
+                        <FormField
+                          control={form.control}
+                          name="dataChamado"
+                          render={({ field }) => (
+                            <>
+                              <FormLabel htmlFor="descricao">
+                                Nova Data *{" "}
+                              </FormLabel>
+                              <Input
+                                placeholder="Digite a descrição da categoria"
+                                {...field}
+                                onChange={(e) => {
+                                  form.setValue("dataChamado", e.target.value);
+                                }}
+                                type="date"
+                              />
+                              <FormMessage />
+                            </>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="flex items-center bg-emerald-500 hover:bg-emerald-600"
+                    >
+                      <>
+                        <CalendarCheck className="w-4 h-4 mr-2" />
+                        Reagendar
+                      </>
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
       <div className="rounded-md border m-2">
         <Table>
@@ -189,29 +326,44 @@ export function DataTable<TData extends Chamado, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <DialogEditChamado
-                  chamado={row.original}
-                  handleCancel={() => handleCancel(row.original)}
-                  handleReagendar={() => handleReagendar(row.original)}
-                  cancelFunction={{
-                    isSuccess: isSuccess,
-                    isPending: isPending,
-                  }}
-                >
+                <>
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                      <>
+                        {cell.column.id === "select" ? (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ) : (
+                          <DialogEditChamado
+                            chamado={row.original}
+                            handleCancel={() => handleCancel(row.original)}
+                            handleReagendar={() =>
+                              handleReagendar(row.original)
+                            }
+                            cancelFunction={{
+                              isSuccess: isSuccess,
+                              isPending: isPending,
+                            }}
+                          >
+                            <TableCell key={cell.id}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          </DialogEditChamado>
                         )}
-                      </TableCell>
+                      </>
                     ))}
                   </TableRow>
-                </DialogEditChamado>
+                </>
               ))
             ) : (
               <TableRow>
