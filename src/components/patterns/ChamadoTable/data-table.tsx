@@ -192,19 +192,33 @@ export function DataTable<TData extends Chamado, TValue>({
   //   });
   // };
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setReagendamento(data.dataChamado);
     localStorage.setItem("dataChamadoAtivo", data.dataChamado);
     handleReagendarChamados(table.getFilteredSelectedRowModel().rows, data);
   };
 
   const [dataReagendamento, setReagendamento] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const notifySaveSucces = () =>
+    toast.success("Reagendamento concluído com sucesso!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: 0,
+      theme: "colored",
+      transition: Bounce,
+    });
 
   const { mutate: handleReagendarChamados }: any = useMutation({
-    mutationFn: (chamados: Row<TData>[]): any => {
-      chamados.map((chamado) => {
+    mutationFn: async (chamados: Row<TData>[]) => {
+      return chamados.map((chamado) => {
         chamado.original.dataChamado = converterData(dataReagendamento);
-        chamadoService.atualizarChamado(chamado.original);
+        return chamadoService.atualizarChamado(chamado.original);
       });
     },
     onSuccess: () => {
@@ -219,12 +233,12 @@ export function DataTable<TData extends Chamado, TValue>({
         queryKey: ["chamados"],
         queryFn: async () => {
           return chamadoService.listarChamadosPorData(
-            formatarDataController(
-              localStorage.getItem("dataChamadoAtivo") ?? ""
-            )
+            formatarDataController(dataReagendamento ?? "")
           );
         },
       });
+      setOpen(false);
+      notifySaveSucces();
     },
   });
 
@@ -243,7 +257,7 @@ export function DataTable<TData extends Chamado, TValue>({
         />
         <div>
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
-            <Dialog>
+            <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-blue-500 hover:bg-blue-400 flex align-middle gap-2">
                   <Clock className="w-4 h-4" />
