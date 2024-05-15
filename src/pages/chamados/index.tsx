@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChamadoService } from "@/app/services/chamados.service";
@@ -84,7 +84,7 @@ export const Chamados = () => {
 
       <Tabs orientation="horizontal">
         <TabsList>
-          <ScrollArea className="w-full h-[35px] whitespace-nowrap fixed bottom-0">
+          <ScrollArea className="w-full md:h-[25px] lg:h-[25px] whitespace-nowrap fixed bottom-0">
             <>
               {datasChamados?.map((_datas) => (
                 <>

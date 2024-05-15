@@ -94,6 +94,6 @@ export const columns: ColumnDef<Chamado>[] = [
     header: () => <div className="hidden"></div>,
     cell: () => <div className="hidden"></div>,
     accessorFn: (row) =>
-      `${row.cliente.nomeFantasia} ${row.descricaoProblema} ${row.contato}`,
+      `${row.id} ${row.cliente.nomeFantasia} ${row.descricaoProblema} ${row.contato}`,
   },
 ];

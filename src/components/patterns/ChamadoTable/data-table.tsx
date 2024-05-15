@@ -195,7 +195,7 @@ export function DataTable<TData extends Chamado, TValue>({
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setReagendamento(data.dataChamado);
     localStorage.setItem("dataChamadoAtivo", data.dataChamado);
-    handleReagendarChamados(table.getFilteredSelectedRowModel().rows, data);
+    handleReagendarChamados(table.getFilteredSelectedRowModel().rows);
   };
 
   const [dataReagendamento, setReagendamento] = useState("");
@@ -214,7 +214,7 @@ export function DataTable<TData extends Chamado, TValue>({
       transition: Bounce,
     });
 
-  const { mutate: handleReagendarChamados }: any = useMutation({
+  const { mutate: handleReagendarChamados } = useMutation({
     mutationFn: async (chamados: Row<TData>[]) => {
       return chamados.map((chamado) => {
         chamado.original.dataChamado = converterData(dataReagendamento);
@@ -222,17 +222,19 @@ export function DataTable<TData extends Chamado, TValue>({
       });
     },
     onSuccess: () => {
-      queryClient.prefetchQuery({
+      localStorage.setItem("dataChamadoAtivo", dataReagendamento);
+
+      queryClient.fetchQuery({
         queryKey: ["datasChamados"],
         queryFn: async () => {
-          return chamadoService.listarDatas();
+          return await chamadoService.listarDatas();
         },
       });
 
       queryClient.fetchQuery({
         queryKey: ["chamados"],
         queryFn: async () => {
-          return chamadoService.listarChamadosPorData(
+          return await chamadoService.listarChamadosPorData(
             formatarDataController(dataReagendamento ?? "")
           );
         },
