@@ -195,7 +195,7 @@ export function DataTable<TData extends Chamado, TValue>({
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setReagendamento(data.dataChamado);
     localStorage.setItem("dataChamadoAtivo", data.dataChamado);
-    handleReagendarChamados(table.getFilteredSelectedRowModel().rows, data);
+    handleReagendarChamados(table.getFilteredSelectedRowModel().rows);
   };
 
   const [dataReagendamento, setReagendamento] = useState("");
@@ -214,12 +214,30 @@ export function DataTable<TData extends Chamado, TValue>({
       transition: Bounce,
     });
 
-  const { mutate: handleReagendarChamados }: any = useMutation({
+  const notifyError = (message: string) =>
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: 0,
+      theme: "colored",
+      transition: Bounce,
+    });
+
+  const { mutate: handleReagendarChamados } = useMutation({
     mutationFn: async (chamados: Row<TData>[]) => {
-      return chamados.map((chamado) => {
+      let novoChamado: Chamado | null = null;
+      let novosChamados: Chamado[] | [] = [];
+      chamados.map((chamado) => {
         chamado.original.dataChamado = converterData(dataReagendamento);
-        return chamadoService.atualizarChamado(chamado.original);
+        novoChamado = chamado.original;
+        novosChamados = [...novosChamados, novoChamado];
       });
+      console.log(JSON.stringify(novosChamados));
+      return await chamadoService.reagendarChamados(novosChamados);
     },
     onSuccess: () => {
       queryClient.prefetchQuery({
@@ -239,6 +257,9 @@ export function DataTable<TData extends Chamado, TValue>({
       });
       setOpen(false);
       notifySaveSucces();
+    },
+    onError: () => {
+      notifyError("Não foi possível reagendar o(s) chamado(s) solicitados!");
     },
   });
 
