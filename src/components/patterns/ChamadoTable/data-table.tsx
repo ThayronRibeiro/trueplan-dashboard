@@ -267,7 +267,7 @@ export function DataTable<TData extends Chamado, TValue>({
     <>
       <div className="flex items-center py-4 ml-5 mr-5 gap-3">
         <Input
-          placeholder="Procurar chamados..."
+          placeholder="Procurar chamados por ID, atendente, cliente ou descrição do problema..."
           value={
             (table.getColumn("normalizador")?.getFilterValue() as string) ?? ""
           }

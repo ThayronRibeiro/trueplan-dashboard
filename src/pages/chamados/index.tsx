@@ -28,7 +28,8 @@ export const Chamados = () => {
   const { data: datasChamados } = useQuery({
     queryKey: ["datasChamados"],
     queryFn: chamadoService.listarDatas,
-    refetchInterval: 60000,
+    refetchInterval: 60000 * 60 * 24,
+    retryDelay: 60000 * 60 * 24,
   });
 
   const { mutateAsync: handleClose } = useMutation({

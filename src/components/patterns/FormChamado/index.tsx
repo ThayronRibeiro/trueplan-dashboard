@@ -25,9 +25,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ReactNode, useEffect, useState } from "react";
-import { Cliente } from "@/app/models/cliente";
-import { Categoria } from "@/app/models/categoria";
+import { ReactNode, useState } from "react";
 import { useClienteService } from "@/app/services/clientes.service";
 import {
   Select,
@@ -44,7 +42,7 @@ import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
 
 import { Bounce, toast } from "react-toastify";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 
 export const FormSchema = z.object({
@@ -135,8 +133,8 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     },
   });
 
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  //const [clientes, setClientes] = useState<Cliente[]>([]);
+  //const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   const [openPopoverCli, setOpenPopoverCli] = useState(false);
   const [openPopoverCat, setOpenPopoverCat] = useState(false);
@@ -159,19 +157,35 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
       transition: Bounce,
     });
 
-  useEffect(() => {
-    //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
-    clienteService.listarTodosOsClientes().then((value) => {
-      console.log("Dados retornados de listarTodosOsClientes:", value);
-      setClientes(value ?? []);
-    });
-    //Adquirindo a lista de categorias para serem utilizadas como fonte de dados no combobox
-    categoriaService.listarTodasAsCategorias().then((value) => {
-      console.log("Dados retornados de listarTodasAsCategorias:", value);
-      setCategorias(value ?? []);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
+  //   clienteService.listarTodosOsClientes().then((value) => {
+  //     console.log("Dados retornados de listarTodosOsClientes:", value);
+  //     setClientes(value ?? []);
+  //   });
+  //   //Adquirindo a lista de categorias para serem utilizadas como fonte de dados no combobox
+  //   categoriaService.listarTodasAsCategorias().then((value) => {
+  //     console.log("Dados retornados de listarTodasAsCategorias:", value);
+  //     setCategorias(value ?? []);
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
+  const { data: clientes } = useQuery({
+    queryKey: ["clientes"],
+    queryFn: () => {
+      return clienteService.listarTodosOsClientes();
+    },
+    retryDelay: 300000,
+  });
+
+  const { data: categorias } = useQuery({
+    queryKey: ["categorias"],
+    queryFn: () => {
+      return categoriaService.listarTodasAsCategorias();
+    },
+    enabled: false,
+  });
 
   return (
     <>
