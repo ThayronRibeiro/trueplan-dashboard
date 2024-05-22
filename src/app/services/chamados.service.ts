@@ -43,9 +43,17 @@ export const useChamadoService = () => {
     return response.data;
   };
 
+  const reagendarChamado = async (chamado: Chamado): Promise<Chamado> => {
+    const response: AxiosResponse<Chamado> = await httpClient.put(
+      `${resourceUrl}/reagendarChamado`,
+      chamado
+    );
+    return response.data;
+  };
+
   const reagendarChamados = async (chamados: Chamado[]): Promise<Chamado[]> => {
     const response: AxiosResponse<Chamado[]> = await httpClient.put(
-      `${resourceUrl}/reagendar`,
+      `${resourceUrl}/reagendarChamados`,
       chamados,
       { headers: { "Content-Type": "application/json" } }
     );
@@ -58,6 +66,7 @@ export const useChamadoService = () => {
     listarChamadosPorData,
     listarChamado,
     atualizarChamado,
+    reagendarChamado,
     reagendarChamados,
   };
 };

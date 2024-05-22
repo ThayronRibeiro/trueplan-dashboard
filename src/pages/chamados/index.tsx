@@ -13,12 +13,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusCircle, Save } from "lucide-react";
-// import { Chamado } from "@/app/models/chamado";
 import { ChamadoTable } from "@/components/patterns/ChamadoTable";
 import { FormChamado } from "@/components/patterns/FormChamado";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useMutation, useQuery } from "@tanstack/react-query";
-//import { formatDate } from "@/app/functions/FormatarData";
 
 export const Chamados = () => {
   const [open, setOpen] = useState(false);
@@ -28,8 +26,7 @@ export const Chamados = () => {
   const { data: datasChamados } = useQuery({
     queryKey: ["datasChamados"],
     queryFn: chamadoService.listarDatas,
-    refetchInterval: 60000 * 60 * 24,
-    retryDelay: 60000 * 60 * 24,
+    staleTime: 60000 * 60 * 24,
   });
 
   const { mutateAsync: handleClose } = useMutation({
@@ -93,7 +90,6 @@ export const Chamados = () => {
                     key={_datas}
                     className="transition-all duration-300"
                     value={_datas}
-                    //onClick={() => handleChangeTab(_datas)}
                   >
                     {_datas.replace("-", "/").replace("-", "/")}
                   </TabsTrigger>

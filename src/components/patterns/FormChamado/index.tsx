@@ -176,7 +176,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     queryFn: () => {
       return clienteService.listarTodosOsClientes();
     },
-    retryDelay: 300000,
+    staleTime: 300000,
   });
 
   const { data: categorias } = useQuery({
@@ -184,7 +184,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     queryFn: () => {
       return categoriaService.listarTodasAsCategorias();
     },
-    enabled: false,
+    staleTime: 300000,
   });
 
   return (

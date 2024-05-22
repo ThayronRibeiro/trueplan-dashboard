@@ -70,7 +70,7 @@ export const FormReagendamento = ({
   const { mutate: onSubmit, isLoading }: any = useMutation({
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
       chamado.dataChamado = converterData(data.dataChamado);
-      return chamadoService.atualizarChamado(chamado);
+      return chamadoService.reagendarChamado(chamado);
     },
     onSuccess: () => {
       localStorage.setItem(
@@ -98,8 +98,8 @@ export const FormReagendamento = ({
       openOrClose();
       notifySaveSucces();
     },
-    onError: (err: AxiosError) => {
-      notifyError(err.toJSON.toString());
+    onError: () => {
+      notifyError("Não foi possível reagendar o chamado!");
     },
   });
 
