@@ -102,7 +102,6 @@ export const DialogEditChamado = ({
   children,
   chamado,
   handleCancel,
-  handleReagendar,
   cancelFunction,
 }: DialogEditChamadoProps) => {
   const [open, setOpen] = useState(false);

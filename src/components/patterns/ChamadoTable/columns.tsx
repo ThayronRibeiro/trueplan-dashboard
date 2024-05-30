@@ -1,6 +1,8 @@
 import { Chamado } from "@/app/models/chamado";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 export const columns: ColumnDef<Chamado>[] = [
   {
@@ -70,7 +72,19 @@ export const columns: ColumnDef<Chamado>[] = [
   {
     id: "cliente",
     accessorKey: "cliente.nomeFantasia",
-    header: () => <div className="w-[220px]">Cliente</div>,
+    // header: () => <div className="w-[220px]">Cliente</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Cliente
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    enableSorting: true,
   },
   {
     accessorKey: "contato",

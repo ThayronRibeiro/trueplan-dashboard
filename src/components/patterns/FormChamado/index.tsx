@@ -40,8 +40,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
-
-import { Bounce, toast } from "react-toastify";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 
@@ -114,7 +112,6 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
         localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
         console.log(chamadoSave.dataAbertura);
         openOrClose();
-        notifySaveSucces();
         queryClient.prefetchQuery({
           queryKey: ["datasChamados"],
           queryFn: () => {
@@ -133,43 +130,12 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
     },
   });
 
-  //const [clientes, setClientes] = useState<Cliente[]>([]);
-  //const [categorias, setCategorias] = useState<Categoria[]>([]);
-
   const [openPopoverCli, setOpenPopoverCli] = useState(false);
   const [openPopoverCat, setOpenPopoverCat] = useState(false);
-  //const navigate = useNavigate();
 
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
   const chamadoService = useChamadoService();
-
-  const notifySaveSucces = () =>
-    toast.success("Cadastrado com sucesso!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: 0,
-      theme: "colored",
-      transition: Bounce,
-    });
-
-  // useEffect(() => {
-  //   //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
-  //   clienteService.listarTodosOsClientes().then((value) => {
-  //     console.log("Dados retornados de listarTodosOsClientes:", value);
-  //     setClientes(value ?? []);
-  //   });
-  //   //Adquirindo a lista de categorias para serem utilizadas como fonte de dados no combobox
-  //   categoriaService.listarTodasAsCategorias().then((value) => {
-  //     console.log("Dados retornados de listarTodasAsCategorias:", value);
-  //     setCategorias(value ?? []);
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   const { data: clientes } = useQuery({
     queryKey: ["clientes"],
