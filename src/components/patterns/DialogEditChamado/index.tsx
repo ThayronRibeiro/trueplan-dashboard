@@ -191,12 +191,12 @@ export const DialogEditChamado = ({
   useEffect(() => {
     //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
     clienteService.listarTodosOsClientes().then((value) => {
-      console.log("Dados retornados de listarTodosOsClientes:", value);
+      //console.log("Dados retornados de listarTodosOsClientes:", value);
       setClientes(value ?? []);
     });
     //Adquirindo a lista de categorias para serem utilizadas como fonte de dados no combobox
     categoriaService.listarTodasAsCategorias().then((value) => {
-      console.log("Dados retornados de listarTodasAsCategorias:", value);
+      // console.log("Dados retornados de listarTodasAsCategorias:", value);
       setCategorias(value ?? []);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

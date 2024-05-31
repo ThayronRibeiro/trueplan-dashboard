@@ -78,7 +78,7 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { mutateAsync: onSubmit }: any = useMutation({
-    mutationKey: ["chamados"],
+    mutationKey: ["chamado-post"],
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
       const chamadoSave: Chamado = {
         descricaoProblema: data.descricaoProblema,
@@ -108,25 +108,62 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
         dataChamado: "",
       };
 
-      chamadoService.salvarChamado(chamadoSave).then(() => {
+      chamadoService.salvarChamado(chamadoSave).then((response) => {
         localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
         console.log(chamadoSave.dataAbertura);
         openOrClose();
-        queryClient.prefetchQuery({
-          queryKey: ["datasChamados"],
-          queryFn: () => {
-            return chamadoService.listarDatas();
-          },
-        });
-        queryClient.fetchQuery({
-          queryKey: ["chamados"],
-          queryFn: () => {
-            return chamadoService.listarChamadosPorData(
-              localStorage.getItem("dataChamadoAtivo") ?? ""
-            );
-          },
-        });
+
+        const datas =
+          queryClient.getQueryData<string[]>(["datasChamados"]) || [];
+
+        queryClient.setQueryData<string[]>(
+          ["datasChamados"],
+          (datasAntigas) => [...(datasAntigas || []), chamadoSave.dataAbertura]
+        );
+
+        const chamados =
+          queryClient.getQueryData<Chamado[]>(["chamados"]) || [];
+
+        queryClient.setQueryData<Chamado[]>(["chamados"], (chamadosAntigos) => [
+          ...(chamadosAntigos || []),
+          response,
+        ]);
+
+        // queryClient.prefetchQuery({
+        //   queryKey: ["datasChamados"],
+        //   queryFn: () => {
+        //     return chamadoService.listarDatas();
+        //   },
+        // });
+        // queryClient.fetchQuery({
+        //   queryKey: ["chamados"],
+        //   queryFn: () => {
+        //     return chamadoService.listarChamadosPorData(
+        //       chamadoSave.dataChamado
+        //     );
+        //   },
+        // });
       });
+
+      // chamadoService.salvarChamado(chamadoSave).then(() => {
+      //   localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
+      //   console.log(chamadoSave.dataAbertura);
+      //   openOrClose();
+      //   queryClient.prefetchQuery({
+      //     queryKey: ["datasChamados"],
+      //     queryFn: () => {
+      //       return chamadoService.listarDatas();
+      //     },
+      //   });
+      //   queryClient.fetchQuery({
+      //     queryKey: ["chamados"],
+      //     queryFn: () => {
+      //       return chamadoService.listarChamadosPorData(
+      //         localStorage.getItem("dataChamadoAtivo") ?? ""
+      //       );
+      //     },
+      //   });
+      // });
     },
   });
 
