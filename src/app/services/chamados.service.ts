@@ -4,6 +4,7 @@ import { AxiosError, AxiosResponse } from "axios";
 import { Chamado } from "../models/chamado";
 import { Bounce, toast } from "react-toastify";
 import { ApiError, isApiError } from "../models/utils/Error";
+import { ChamadoDTO } from "../dto/chamadoDTO";
 
 const resourceUrl: string = "/api/v1/chamados";
 
@@ -55,7 +56,7 @@ export const useChamadoService = () => {
     return response.data;
   };
 
-  const salvarChamado = async (chamado: Chamado): Promise<Chamado> => {
+  const salvarChamado = async (chamado: ChamadoDTO): Promise<Chamado> => {
     try {
       const response: AxiosResponse<Chamado> = await httpClient.post<Chamado>(
         `${resourceUrl}`,

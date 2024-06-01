@@ -65,6 +65,7 @@ import { Categoria } from "@/app/models/categoria";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 import { Bounce, toast } from "react-toastify";
+import { ChamadoDTO } from "@/app/dto/chamadoDTO";
 
 interface DialogEditChamadoProps {
   children: ReactNode;
@@ -124,32 +125,44 @@ export const DialogEditChamado = ({
   const { mutateAsync: onSubmit }: any = useMutation({
     mutationKey: ["chamados"],
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
-      const chamadoSave: Chamado = {
+      const chamadoSave: ChamadoDTO = {
         descricaoProblema: data.descricaoProblema,
-        cliente: {
-          id: data.cliente_id,
-        },
-        categoria: {
-          id: data.categoria_id,
-        },
+        clienteId: data.cliente_id,
+        categoriaId: data.categoria_id,
         telefone1: data.telefone1,
         telefone2: data.telefone2,
-        usuario: {
-          id: "1",
-          nome: "",
-          email: "",
-          status: "",
-          dataCadastro: "",
-          ultimoAcesso: "",
-        },
+        usuarioId: "1",
+        statusChamadoId: "1",
         prioridade: data.prioridade.valueOf(),
         contato: data.contato,
-        status: {
-          id: "1",
-        },
         dataAbertura: "",
         observacao: data.observacao,
         dataChamado: "",
+        // descricaoProblema: data.descricaoProblema,
+        // cliente: {
+        //   id: data.cliente_id,
+        // },
+        // categoria: {
+        //   id: data.categoria_id,
+        // },
+        // telefone1: data.telefone1,
+        // telefone2: data.telefone2,
+        // usuario: {
+        //   id: "1",
+        //   nome: "",
+        //   email: "",
+        //   status: "",
+        //   dataCadastro: "",
+        //   ultimoAcesso: "",
+        // },
+        // prioridade: data.prioridade.valueOf(),
+        // contato: data.contato,
+        // status: {
+        //   id: "1",
+        // },
+        // dataAbertura: "",
+        // observacao: data.observacao,
+        // dataChamado: "",
       };
 
       chamadoService.salvarChamado(chamadoSave).then(() => {
