@@ -311,7 +311,6 @@ export const DialogEditChamado = ({
               >
                 <FormField
                   control={form.control}
-                  defaultValue={defaultValues?.cliente_id}
                   name="cliente_id"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
@@ -345,6 +344,7 @@ export const DialogEditChamado = ({
                             <CommandInput
                               placeholder="Selecione o cliente..."
                               className="h-9"
+                              defaultValue={defaultValues?.cliente_id}
                             />
                             <CommandList>
                               <CommandEmpty>
