@@ -3,8 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -23,6 +25,7 @@ import {
   Clock,
   Hand,
   Repeat,
+  Save,
   SquareCheckBig,
   X,
 } from "lucide-react";
@@ -62,7 +65,7 @@ import { useChamadoService } from "@/app/services/chamados.service";
 import { cn } from "@/lib/utils";
 import { Cliente } from "@/app/models/cliente";
 import { Categoria } from "@/app/models/categoria";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 import { Bounce, toast } from "react-toastify";
 import { ChamadoDTO } from "@/app/dto/chamadoDTO";
@@ -108,16 +111,14 @@ export const DialogEditChamado = ({
   const [open, setOpen] = useState(false);
   const [openReagendamento, setOpenReagendamento] = useState(false);
 
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [changes, setChanges] = useState(false);
 
   const [openPopoverCli, setOpenPopoverCli] = useState(false);
   const [openPopoverCat, setOpenPopoverCat] = useState(false);
-  //const navigate = useNavigate();
 
+  const chamadoService = useChamadoService();
   const clienteService = useClienteService();
   const categoriaService = useCategoriaService();
-  const chamadoService = useChamadoService();
 
   const queryClient = useQueryClient();
 
@@ -126,6 +127,7 @@ export const DialogEditChamado = ({
     mutationKey: ["chamados"],
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
       const chamadoSave: ChamadoDTO = {
+        id: chamado?.id?.toString(),
         descricaoProblema: data.descricaoProblema,
         clienteId: data.cliente_id,
         categoriaId: data.categoria_id,
@@ -137,35 +139,10 @@ export const DialogEditChamado = ({
         contato: data.contato,
         dataAbertura: "",
         observacao: data.observacao,
-        dataChamado: "",
-        // descricaoProblema: data.descricaoProblema,
-        // cliente: {
-        //   id: data.cliente_id,
-        // },
-        // categoria: {
-        //   id: data.categoria_id,
-        // },
-        // telefone1: data.telefone1,
-        // telefone2: data.telefone2,
-        // usuario: {
-        //   id: "1",
-        //   nome: "",
-        //   email: "",
-        //   status: "",
-        //   dataCadastro: "",
-        //   ultimoAcesso: "",
-        // },
-        // prioridade: data.prioridade.valueOf(),
-        // contato: data.contato,
-        // status: {
-        //   id: "1",
-        // },
-        // dataAbertura: "",
-        // observacao: data.observacao,
-        // dataChamado: "",
+        dataChamado: chamado.dataChamado,
       };
 
-      chamadoService.salvarChamado(chamadoSave).then(() => {
+      chamadoService.atualizarChamado(chamadoSave).then(() => {
         localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
         console.log(chamadoSave.dataAbertura);
         // openOrClose();
@@ -201,33 +178,55 @@ export const DialogEditChamado = ({
       transition: Bounce,
     });
 
-  useEffect(() => {
-    //Adquirindo a lista de clientes para servir de fonte de dados no combobox de criação de novo chamado
-    clienteService.listarTodosOsClientes().then((value) => {
-      //console.log("Dados retornados de listarTodosOsClientes:", value);
-      setClientes(value ?? []);
-    });
-    //Adquirindo a lista de categorias para serem utilizadas como fonte de dados no combobox
-    categoriaService.listarTodasAsCategorias().then((value) => {
-      // console.log("Dados retornados de listarTodasAsCategorias:", value);
-      setCategorias(value ?? []);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data: clientes } = useQuery({
+    queryKey: ["clientes"],
+    queryFn: () => {
+      return clienteService.listarTodosOsClientes();
+    },
+    staleTime: 300000,
+  });
+
+  const { data: categorias } = useQuery({
+    queryKey: ["categorias"],
+    queryFn: () => {
+      return categoriaService.listarTodasAsCategorias();
+    },
+    staleTime: 300000,
+  });
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
   const defaultValues = {
-    descricaoProblema: chamado.descricaoProblema,
-    contato: chamado.contato,
+    descricaoProblema: chamado.descricaoProblema.toUpperCase(),
+    contato: chamado.contato.toUpperCase(),
     observacao: chamado.observacao,
     prioridade: chamado.prioridade,
-    cliente_id: chamado.cliente.id,
+    cliente_id: chamado.cliente.id.toString(),
     telefone1: chamado.telefone1,
     telefone2: chamado.telefone2,
+    categoria_id: chamado.categoria?.id?.toString(),
   };
+
+  useEffect(() => {
+    form.setValue("cliente_id", defaultValues.cliente_id.toString());
+    form.setValue("categoria_id", defaultValues.categoria_id?.toString() || "");
+  }, []);
+
+  const handleChanges = () => {
+    setChanges(
+      form.getValues("cliente_id") != defaultValues.cliente_id ||
+        form.getValues("contato") != defaultValues.contato ||
+        form.getValues("descricaoProblema") !=
+          defaultValues.descricaoProblema ||
+        form.getValues("observacao") != defaultValues.observacao ||
+        form.getValues("categoria_id") != defaultValues.categoria_id
+        ? true
+        : false
+    );
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -344,7 +343,6 @@ export const DialogEditChamado = ({
                             <CommandInput
                               placeholder="Selecione o cliente..."
                               className="h-9"
-                              defaultValue={defaultValues?.cliente_id}
                             />
                             <CommandList>
                               <CommandEmpty>
@@ -360,12 +358,14 @@ export const DialogEditChamado = ({
                                         "cliente_id",
                                         cliente.id?.toString() ?? ""
                                       );
+                                      handleChanges();
                                     }}
                                     onSelect={() => {
                                       form.setValue(
                                         "cliente_id",
                                         cliente.id?.toString() ?? ""
                                       );
+                                      handleChanges();
                                     }}
                                     onDoubleClick={() => {
                                       setOpenPopoverCli(false);
@@ -442,6 +442,7 @@ export const DialogEditChamado = ({
                                 "contato",
                                 e.target.value.toUpperCase()
                               );
+                              handleChanges();
                             }}
                             autoComplete="false"
                           />
@@ -547,12 +548,14 @@ export const DialogEditChamado = ({
                                             "categoria_id",
                                             categoria.id?.toString() ?? ""
                                           );
+                                          handleChanges();
                                         }}
                                         onSelect={() => {
                                           form.setValue(
                                             "categoria_id",
                                             categoria.id?.toString() ?? ""
                                           );
+                                          handleChanges();
                                         }}
                                         onDoubleClick={() => {
                                           setOpenPopoverCat(false);
@@ -603,6 +606,7 @@ export const DialogEditChamado = ({
                                 "descricaoProblema",
                                 e.target.value.toUpperCase()
                               );
+                              handleChanges();
                             }}
                           />
                           <FormMessage />
@@ -619,6 +623,7 @@ export const DialogEditChamado = ({
                     <FormItem className="flex flex-col">
                       <FormLabel>Observação (Opcional) </FormLabel>
                       <Textarea
+                        defaultValue={defaultValues.observacao}
                         className="max-h-[75px]"
                         placeholder="Digite uma observação sobre o chamado"
                         {...field}
@@ -627,12 +632,28 @@ export const DialogEditChamado = ({
                             "observacao",
                             e.target.value.toUpperCase()
                           );
+                          handleChanges();
                         }}
                       />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant={"outline"}>
+                      Cancelar
+                    </Button>
+                  </DialogClose>
+                  <Button
+                    disabled={!changes ? true : false}
+                    type="submit"
+                    className="flex items-center bg-emerald-500 hover:bg-emerald-600"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar
+                  </Button>
+                </DialogFooter>
               </form>
             </Form>
           </ScrollArea>
