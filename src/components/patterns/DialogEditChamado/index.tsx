@@ -216,12 +216,12 @@ export const DialogEditChamado = ({
 
   const handleChanges = () => {
     setChanges(
-      form.getValues("cliente_id") != defaultValues.cliente_id ||
+      form.getValues("cliente_id") != defaultValues.cliente_id.toString() ||
         form.getValues("contato") != defaultValues.contato ||
         form.getValues("descricaoProblema") !=
           defaultValues.descricaoProblema ||
         form.getValues("observacao") != defaultValues.observacao ||
-        form.getValues("categoria_id") != defaultValues.categoria_id
+        form.getValues("categoria_id") != defaultValues.categoria_id?.toString()
         ? true
         : false
     );
