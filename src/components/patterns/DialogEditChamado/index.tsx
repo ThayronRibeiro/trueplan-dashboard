@@ -59,13 +59,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useClienteService } from "@/app/services/clientes.service";
-import { useCategoriaService } from "@/app/services/categoria.service";
 import { useChamadoService } from "@/app/services/chamados.service";
 import { cn } from "@/lib/utils";
 import { Cliente } from "@/app/models/cliente";
 import { Categoria } from "@/app/models/categoria";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 import { Bounce, toast } from "react-toastify";
 import { ChamadoDTO } from "@/app/dto/chamadoDTO";
@@ -117,8 +115,6 @@ export const DialogEditChamado = ({
   const [openPopoverCat, setOpenPopoverCat] = useState(false);
 
   const chamadoService = useChamadoService();
-  const clienteService = useClienteService();
-  const categoriaService = useCategoriaService();
 
   const queryClient = useQueryClient();
 
@@ -178,21 +174,29 @@ export const DialogEditChamado = ({
       transition: Bounce,
     });
 
-  const { data: clientes } = useQuery({
-    queryKey: ["clientes"],
-    queryFn: () => {
-      return clienteService.listarTodosOsClientes();
-    },
-    staleTime: 300000,
-  });
+  const clientes: Cliente[] | undefined = queryClient.getQueryData([
+    "clientes",
+  ]);
 
-  const { data: categorias } = useQuery({
-    queryKey: ["categorias"],
-    queryFn: () => {
-      return categoriaService.listarTodasAsCategorias();
-    },
-    staleTime: 300000,
-  });
+  const categorias: Categoria[] | undefined = queryClient.getQueryData([
+    "categorias",
+  ]);
+
+  // const { data: clientes } = useQuery({
+  //   queryKey: ["clientes"],
+  //   queryFn: () => {
+  //     return clienteService.listarTodosOsClientes();
+  //   },
+  //   staleTime: 300000,
+  // });
+
+  // const { data: categorias } = useQuery({
+  //   queryKey: ["categorias"],
+  //   queryFn: () => {
+  //     return categoriaService.listarTodasAsCategorias();
+  //   },
+  //   staleTime: 300000,
+  // });
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -221,7 +225,10 @@ export const DialogEditChamado = ({
         form.getValues("descricaoProblema") !=
           defaultValues.descricaoProblema ||
         form.getValues("observacao") != defaultValues.observacao ||
-        form.getValues("categoria_id") != defaultValues.categoria_id?.toString()
+        form.getValues("categoria_id") !=
+          defaultValues.categoria_id?.toString() ||
+        form.getValues("telefone1") != defaultValues.telefone1 ||
+        form.getValues("telefone2") != defaultValues.telefone2
         ? true
         : false
     );
@@ -405,7 +412,11 @@ export const DialogEditChamado = ({
                             Prioridade *{" "}
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={() => {
+                              field.onChange(() => {
+                                handleChanges();
+                              });
+                            }}
                             defaultValue={field.value}
                           >
                             <FormControl>
@@ -465,6 +476,7 @@ export const DialogEditChamado = ({
                             {...field}
                             onChange={(e) => {
                               form.setValue("telefone1", e.target.value);
+                              handleChanges();
                             }}
                             autoComplete="false"
                           />
@@ -486,6 +498,7 @@ export const DialogEditChamado = ({
                             {...field}
                             onChange={(e) => {
                               form.setValue("telefone2", e.target.value);
+                              handleChanges();
                             }}
                           />
                           <FormMessage />

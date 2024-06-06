@@ -43,6 +43,8 @@ import { useChamadoService } from "@/app/services/chamados.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 import { ChamadoDTO } from "@/app/dto/chamadoDTO";
+import { Cliente } from "@/app/models/cliente";
+import { Categoria } from "@/app/models/categoria";
 
 export const FormSchema = z.object({
   cliente_id: z.string({
@@ -164,21 +166,29 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
   const categoriaService = useCategoriaService();
   const chamadoService = useChamadoService();
 
-  const { data: clientes } = useQuery({
-    queryKey: ["clientes"],
-    queryFn: () => {
-      return clienteService.listarTodosOsClientes();
-    },
-    staleTime: 300000,
-  });
+  const clientes: Cliente[] | undefined = queryClient.getQueryData([
+    "clientes",
+  ]);
 
-  const { data: categorias } = useQuery({
-    queryKey: ["categorias"],
-    queryFn: () => {
-      return categoriaService.listarTodasAsCategorias();
-    },
-    staleTime: 300000,
-  });
+  const categorias: Categoria[] | undefined = queryClient.getQueryData([
+    "categorias",
+  ]);
+
+  // const { data: clientes } = useQuery({
+  //   queryKey: ["clientes"],
+  //   queryFn: () => {
+  //     return clienteService.listarTodosOsClientes();
+  //   },
+  //   staleTime: 300000,
+  // });
+
+  // const { data: categorias } = useQuery({
+  //   queryKey: ["categorias"],
+  //   queryFn: () => {
+  //     return categoriaService.listarTodasAsCategorias();
+  //   },
+  //   staleTime: 300000,
+  // });
 
   return (
     <>
