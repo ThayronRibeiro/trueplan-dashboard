@@ -138,10 +138,12 @@ export const DialogEditChamado = ({
         dataChamado: chamado.dataChamado,
       };
 
-      chamadoService.atualizarChamado(chamadoSave).then(() => {
+      console.log(chamadoSave);
+
+      chamadoService.atualizarChamado(chamadoSave).then((response) => {
         localStorage.setItem("dataChamadoAtivo", formatDate(new Date()));
         console.log(chamadoSave.dataAbertura);
-        // openOrClose();
+        setOpen(false);
         notifySaveSucces();
         queryClient.prefetchQuery({
           queryKey: ["datasChamados"],
@@ -149,14 +151,20 @@ export const DialogEditChamado = ({
             return chamadoService.listarDatas();
           },
         });
-        queryClient.fetchQuery({
-          queryKey: ["chamados"],
-          queryFn: () => {
-            return chamadoService.listarChamadosPorData(
-              localStorage.getItem("dataChamadoAtivo") ?? ""
-            );
-          },
+
+        queryClient.setQueryData<Chamado[]>(["chamados"], (chamadosAntigos) => {
+          return chamadosAntigos?.map((chamado) =>
+            chamado.id === response.id ? response : chamado
+          );
         });
+        // queryClient.fetchQuery({
+        //   queryKey: ["chamados"],
+        //   queryFn: () => {
+        //     return chamadoService.listarChamadosPorData(
+        //       localStorage.getItem("dataChamadoAtivo") ?? ""
+        //     );
+        //   },
+        // });
       });
     },
   });
@@ -216,19 +224,23 @@ export const DialogEditChamado = ({
   useEffect(() => {
     form.setValue("cliente_id", defaultValues.cliente_id.toString());
     form.setValue("categoria_id", defaultValues.categoria_id?.toString() || "");
+    form.setValue("prioridade", defaultValues.prioridade);
   }, []);
 
   const handleChanges = () => {
     setChanges(
-      form.getValues("cliente_id") != defaultValues.cliente_id.toString() ||
+      form.getValues("cliente_id").toString() !=
+        defaultValues.cliente_id.toString() ||
         form.getValues("contato") != defaultValues.contato ||
         form.getValues("descricaoProblema") !=
           defaultValues.descricaoProblema ||
         form.getValues("observacao") != defaultValues.observacao ||
-        form.getValues("categoria_id") !=
+        form.getValues("categoria_id").toString() !=
           defaultValues.categoria_id?.toString() ||
         form.getValues("telefone1") != defaultValues.telefone1 ||
-        form.getValues("telefone2") != defaultValues.telefone2
+        form.getValues("telefone2") != defaultValues.telefone2 ||
+        form.getValues("prioridade").toString() !=
+          defaultValues.prioridade.toString()
         ? true
         : false
     );
@@ -404,19 +416,17 @@ export const DialogEditChamado = ({
                   <div className="col-span-1">
                     <FormField
                       control={form.control}
-                      defaultValue={"URGENTE"}
                       name="prioridade"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem
+                          className="flex flex-col"
+                          onChange={() => handleChanges()}
+                        >
                           <FormLabel htmlFor="prioridade">
                             Prioridade *{" "}
                           </FormLabel>
                           <Select
-                            onValueChange={() => {
-                              field.onChange(() => {
-                                handleChanges();
-                              });
-                            }}
+                            onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>

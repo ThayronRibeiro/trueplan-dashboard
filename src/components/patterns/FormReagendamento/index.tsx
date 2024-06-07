@@ -1,5 +1,4 @@
 import { converterData } from "@/app/functions/ConverterData";
-import { formatarDataController } from "@/app/functions/FormatarDataController";
 import { formatarDataISO } from "@/app/functions/FormatarDataISO";
 import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
@@ -48,25 +47,11 @@ export const FormReagendamento = ({
         "dataChamadoAtivo",
         formatarDataISO(chamado.dataChamado)
       );
-
-      queryClient.prefetchQuery({
-        queryKey: ["datasChamados"],
-        queryFn: async () => {
-          return chamadoService.listarDatas();
-        },
-      });
-
-      queryClient.fetchQuery({
-        queryKey: ["chamados"],
-        queryFn: async () => {
-          return chamadoService.listarChamadosPorData(
-            formatarDataController(
-              localStorage.getItem("dataChamadoAtivo") ?? ""
-            )
-          );
-        },
-      });
       openOrClose();
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["datasChamados"] });
+      queryClient.invalidateQueries({ queryKey: ["chamados"] });
     },
   });
 

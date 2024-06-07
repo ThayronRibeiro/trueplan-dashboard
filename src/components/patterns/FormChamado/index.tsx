@@ -26,7 +26,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ReactNode, useState } from "react";
-import { useClienteService } from "@/app/services/clientes.service";
 import {
   Select,
   SelectContent,
@@ -35,12 +34,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useCategoriaService } from "@/app/services/categoria.service";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Chamado } from "@/app/models/chamado";
 import { useChamadoService } from "@/app/services/chamados.service";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/app/functions/FormatarData";
 import { ChamadoDTO } from "@/app/dto/chamadoDTO";
 import { Cliente } from "@/app/models/cliente";
@@ -105,16 +103,17 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
         console.log(chamadoSave.dataAbertura);
         openOrClose();
 
+        /*
         const datas =
           queryClient.getQueryData<string[]>(["datasChamados"]) || [];
-
+*/
         queryClient.setQueryData<string[]>(
           ["datasChamados"],
           (datasAntigas) => [...(datasAntigas || []), chamadoSave.dataAbertura]
         );
 
-        const chamados =
-          queryClient.getQueryData<Chamado[]>(["chamados"]) || [];
+        // const chamados =
+        //   queryClient.getQueryData<Chamado[]>(["chamados"]) || [];
 
         queryClient.setQueryData<Chamado[]>(["chamados"], (chamadosAntigos) => [
           ...(chamadosAntigos || []),
@@ -162,8 +161,6 @@ export const FormChamado = ({ children, openOrClose }: FormChamadoProps) => {
   const [openPopoverCli, setOpenPopoverCli] = useState(false);
   const [openPopoverCat, setOpenPopoverCat] = useState(false);
 
-  const clienteService = useClienteService();
-  const categoriaService = useCategoriaService();
   const chamadoService = useChamadoService();
 
   const clientes: Cliente[] | undefined = queryClient.getQueryData([
